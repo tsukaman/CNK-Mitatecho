@@ -23,36 +23,36 @@ export async function onRequestGet(context) {
 
     const total = countResult?.total || 0;
 
-    // If 5 or fewer, return all
-    if (total <= 5) {
+    // If 8 or fewer, return all
+    if (total <= 8) {
       const all = await env.DB.prepare(
-        `SELECT free_text, character_id, created_at
+        `SELECT free_text, character_id, nickname, nickname_public, created_at
          FROM answers WHERE card_id = ?
          ORDER BY created_at DESC`
       ).bind(card).all();
       return successResponse({ entries: all.results });
     }
 
-    // Latest 2
+    // Latest 3
     const latest = await env.DB.prepare(
-      `SELECT id, free_text, character_id, created_at
+      `SELECT id, free_text, character_id, nickname, nickname_public, created_at
        FROM answers WHERE card_id = ?
-       ORDER BY created_at DESC LIMIT 2`
+       ORDER BY created_at DESC LIMIT 3`
     ).bind(card).all();
 
     const latestIds = latest.results.map(r => r.id);
 
-    // Random 3 (excluding latest 2)
+    // Random 5 (excluding latest 3)
     const placeholders = latestIds.map(() => '?').join(',');
     const random = await env.DB.prepare(
-      `SELECT free_text, character_id, created_at
+      `SELECT free_text, character_id, nickname, nickname_public, created_at
        FROM answers WHERE card_id = ? AND id NOT IN (${placeholders})
-       ORDER BY RANDOM() LIMIT 3`
+       ORDER BY RANDOM() LIMIT 5`
     ).bind(card, ...latestIds).all();
 
     // Combine: latest first, then random
     const entries = [
-      ...latest.results.map(({ free_text, character_id, created_at }) => ({ free_text, character_id, created_at })),
+      ...latest.results.map(({ free_text, character_id, nickname, nickname_public, created_at }) => ({ free_text, character_id, nickname, nickname_public, created_at })),
       ...random.results,
     ];
 

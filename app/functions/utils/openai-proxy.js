@@ -1,6 +1,6 @@
 /**
  * OpenAI API プロキシ設定
- * CND2プロジェクトからの移植。地域制限を回避するためのプロキシ経由でのAPI呼び出し。
+ * OpenAI直接呼び出しを最優先、失敗時にOpenRouter経由でフォールバック。
  */
 
 const OPENROUTER_MODEL_MAPPING = {
@@ -26,7 +26,30 @@ export async function callOpenAIWithProxy({ apiKey, body, env }) {
     throw new Error('Invalid request body: missing model');
   }
 
-  // Method 1: OpenRouter (most reliable for region bypass)
+  // Method 1: Direct OpenAI API (preferred)
+  if (apiKey) {
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (response.ok) {
+        return response;
+      }
+
+      // 403 = region block (HKG routing), fall through to OpenRouter
+      console.warn(`OpenAI direct failed (${response.status}), trying OpenRouter fallback`);
+    } catch (err) {
+      console.warn('OpenAI direct error, trying OpenRouter fallback:', err.message);
+    }
+  }
+
+  // Method 2: OpenRouter fallback (region bypass)
   if (env?.OPENROUTER_API_KEY && env.OPENROUTER_API_KEY.startsWith('sk-or-v1-')) {
     const openRouterBody = {
       ...body,
@@ -45,17 +68,5 @@ export async function callOpenAIWithProxy({ apiKey, body, env }) {
     });
   }
 
-  // Method 2: Direct OpenAI API (may fail due to HKG routing)
-  if (apiKey) {
-    return fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
-  }
-
-  throw new Error('No API key configured (OPENROUTER_API_KEY or OPENAI_API_KEY required)');
+  throw new Error('No API key configured (OPENAI_API_KEY or OPENROUTER_API_KEY required)');
 }
