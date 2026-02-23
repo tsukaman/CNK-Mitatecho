@@ -32,8 +32,8 @@ export async function onRequest(context) {
   const url = new URL(request.url);
   const ua = request.headers.get('user-agent') || '';
 
-  // Bot detection for /result page
-  if (url.pathname === '/result' && BOT_UA_PATTERN.test(ua)) {
+  // Bot detection for /result page (OGP画像ができたら有効化)
+  if (false && url.pathname === '/result' && BOT_UA_PATTERN.test(ua)) {
     const id = url.searchParams.get('id');
     if (id && env.DB) {
       try {

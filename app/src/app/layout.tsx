@@ -12,10 +12,10 @@ export const metadata: Metadata = {
   openGraph: {
     title: "風雲戦国見立帖 〜千人一首〜",
     description: "戦国武将 × エンジニアタイプ診断 + AIパーソナライズ短歌",
-    images: ["/og-image.png"],
+    // images: ["/og-image.png"],  // OGP画像ができたら有効化
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: "風雲戦国見立帖 〜千人一首〜",
     description: "戦国武将 × エンジニアタイプ診断 + AIパーソナライズ短歌",
   },
