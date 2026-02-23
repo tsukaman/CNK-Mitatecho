@@ -1,0 +1,11 @@
+name = "prairie-cnk"
+compatibility_date = "2025-01-25"
+pages_build_output_dir = "out"
+
+[placement]
+region = "aws:us-east-1"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "prairie-cnk-db"
+database_id = "to-be-created"

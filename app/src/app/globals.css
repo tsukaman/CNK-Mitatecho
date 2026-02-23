@@ -1,0 +1,206 @@
+@import "tailwindcss";
+
+/* === CNK公式カラーパレット（Tailwind 4 テーマ） === */
+@theme {
+  /* 紅（べに）— アクセント・リンク */
+  --color-beni-50: #fef1f1;
+  --color-beni-100: #fcdedf;
+  --color-beni-200: #fabdbe;
+  --color-beni-400: #f77174;
+  --color-beni-500: #f63941;
+  --color-beni-600: #d4212a;
+  --color-beni-700: #ac1920;
+  --color-beni-800: #861117;
+  --color-beni-900: #4d0609;
+
+  /* 緑青（ろくしょう）— ボタン・CTA */
+  --color-rokusyo-300: #75bdbd;
+  --color-rokusyo-500: #548a8a;
+  --color-rokusyo-700: #2f5151;
+  --color-rokusyo-800: #203939;
+
+  /* 黄金（こがね）— 装飾 */
+  --color-kogane-300: #e2bc67;
+  --color-kogane-500: #a78a4a;
+
+  /* 墨（すみ）— テキスト・ボーダー */
+  --color-sumi-50: #f1f1f1;
+  --color-sumi-100: #e5e5e5;
+  --color-sumi-200: #c9c9c9;
+  --color-sumi-300: #b0b0b0;
+  --color-sumi-400: #989898;
+  --color-sumi-500: #7f7f7f;
+  --color-sumi-600: #686868;
+  --color-sumi-700: #525252;
+  --color-sumi-800: #3b3b3b;
+  --color-sumi-900: #282828;
+  --color-sumi-950: #1e1e1e;
+
+  /* 和紙（わし）— 背景 */
+  --color-washi-100: #fcfcfc;
+  --color-washi-200: #f5f5f0;
+
+  /* フォント */
+  --font-sans: "Noto Sans JP", "Helvetica Neue", "Arial", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", sans-serif;
+  --font-serif: "Noto Serif JP", "Times New Roman", "YuMincho", "Hiragino Mincho ProN", "Yu Mincho", "MS PMincho", serif;
+  --font-zen: "Zen Old Mincho", "Times New Roman", "YuMincho", "Hiragino Mincho ProN", "Yu Mincho", "MS PMincho", serif;
+  --font-brush: "Yuji Boku", "Zen Old Mincho", "YuMincho", "Hiragino Mincho ProN", serif;
+}
+
+/* === ライトテーマ ベースパレット === */
+:root {
+  /* Card accent colors */
+  --card-aka: #c43c3c;
+  --card-ai: #4a7fb5;
+  --card-midori: #4a8c5c;
+  --card-kogane: #b8963e;
+  --card-murasaki: #8b5cad;
+  --card-shiro: #8a9aad;
+}
+
+body {
+  font-family: var(--font-serif);
+  background-color: var(--color-washi-100);
+  color: var(--color-sumi-950);
+}
+
+/* 和紙テクスチャ背景 */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.08;
+  background-image: url("/texture-washi.webp");
+  background-size: 400px 400px;
+  background-repeat: repeat;
+}
+
+/* === 共通ボタン: セカンダリ === */
+.wa-btn {
+  background-color: var(--color-washi-100);
+  border: 1px solid var(--color-sumi-200);
+  color: var(--color-sumi-900);
+  transition: all 0.2s ease;
+}
+.wa-btn:hover {
+  border-color: var(--color-rokusyo-500);
+  color: var(--color-rokusyo-700);
+  box-shadow: 0 2px 8px rgba(84, 138, 138, 0.15);
+  transform: translateY(-1px);
+}
+.wa-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(84, 138, 138, 0.1);
+}
+
+/* === 共通ボタン: CTA === */
+.wa-cta {
+  background-color: var(--color-beni-800);
+  color: white;
+  transition: all 0.3s ease;
+}
+.wa-cta:hover:not(:disabled) {
+  background-color: var(--color-beni-700);
+  box-shadow: 0 4px 16px rgba(134, 17, 23, 0.25);
+  transform: translateY(-1px);
+}
+.wa-cta:disabled {
+  opacity: 0.4;
+}
+
+/* === 共通フォーム要素 === */
+.wa-input {
+  background-color: white;
+  border: 1px solid var(--color-sumi-200);
+  color: var(--color-sumi-950);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.wa-input:focus {
+  border-color: var(--color-rokusyo-500);
+  box-shadow: 0 0 0 2px rgba(84, 138, 138, 0.15);
+  outline: none;
+}
+.wa-input::placeholder {
+  color: var(--color-sumi-400);
+}
+
+/* === 区切り線 === */
+.kinpaku-line {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-sumi-300) 20%,
+    var(--color-sumi-300) 80%,
+    transparent
+  );
+  opacity: 0.5;
+}
+
+/* === 短歌用装飾ボックス === */
+.poem-box {
+  position: relative;
+  border: 1px solid var(--color-sumi-200);
+  background: linear-gradient(
+    135deg,
+    rgba(84, 138, 138, 0.04),
+    transparent 40%,
+    transparent 60%,
+    rgba(84, 138, 138, 0.02)
+  );
+}
+.poem-box::before,
+.poem-box::after {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  opacity: 0.6;
+}
+.poem-box::before {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid var(--color-rokusyo-500);
+  border-left: 2px solid var(--color-rokusyo-500);
+}
+.poem-box::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 2px solid var(--color-rokusyo-500);
+  border-right: 2px solid var(--color-rokusyo-500);
+}
+
+/* === カードコンポーネント === */
+.cnk-card {
+  background-color: var(--color-washi-100);
+  border: 1px solid var(--color-sumi-100);
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+}
+.cnk-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+/* === アニメーション === */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in { animation: fadeSlideUp 0.5s ease-out both; }
+.animate-fade-in-d1 { animation: fadeSlideUp 0.5s ease-out 0.05s both; }
+.animate-fade-in-d2 { animation: fadeSlideUp 0.5s ease-out 0.10s both; }
+.animate-fade-in-d3 { animation: fadeSlideUp 0.5s ease-out 0.15s both; }
+.animate-fade-in-d4 { animation: fadeSlideUp 0.5s ease-out 0.20s both; }
+.animate-fade-in-d5 { animation: fadeSlideUp 0.5s ease-out 0.25s both; }
+.animate-fade-in-d6 { animation: fadeSlideUp 0.5s ease-out 0.30s both; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+.animate-gold-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}

@@ -1,0 +1,9 @@
+node_modules/
+.next/
+out/
+references/
+.env*
+.wrangler/
+*.log
+.DS_Store
+.playwright-mcp/
