@@ -3,7 +3,11 @@ node_modules/
 out/
 references/
 .env*
+.dev.vars
 .wrangler/
 *.log
 .DS_Store
 .playwright-mcp/
+*.tsbuildinfo
+# スクリーンショット参考画像
+/*.png

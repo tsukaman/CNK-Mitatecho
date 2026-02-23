@@ -35,7 +35,7 @@ CNK-Mitatecho/
 - **ホスティング**: Cloudflare Pages
 - **API**: Cloudflare Functions (Workers)
 - **データベース**: Cloudflare D1 (SQLite)
-- **LLM**: OpenAI API (gpt-5-mini) / フォールバック: OpenRouter
+- **LLM**: OpenAI API (gpt-4o-mini) / フォールバック: OpenRouter
 - **パッケージマネージャ**: npm
 - **ワーキングディレクトリ**: `app/` 配下で npm コマンドを実行
 

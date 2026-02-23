@@ -3,9 +3,10 @@ compatibility_date = "2025-01-25"
 pages_build_output_dir = "out"
 
 [placement]
-region = "aws:us-east-1"
+mode = "smart"
+hint = "wnam"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "prairie-cnk-db"
-database_id = "to-be-created"
+database_id = "dc61e8a3-e575-4abb-93d5-e0eca85ae039"

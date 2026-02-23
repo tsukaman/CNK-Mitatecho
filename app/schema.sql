@@ -6,8 +6,8 @@ CREATE TABLE IF NOT EXISTS answers (
   free_text TEXT NOT NULL,
   character_id INTEGER NOT NULL,
   poem TEXT,
-  x_account TEXT,
-  ogp_include INTEGER NOT NULL DEFAULT 0,
+  nickname TEXT,
+  nickname_public INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
