@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import PageTransitionProvider from "@/components/PageTransition";
 
 export const metadata: Metadata = {
   title: "風雲戦国見立帖 〜千人一首〜",
@@ -24,10 +26,13 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-washi-100 text-sumi-950 font-serif antialiased">
-        <Header />
-        <main className="relative z-10 mx-auto max-w-lg px-4 pb-8 pt-20">
-          {children}
-        </main>
+        <PageTransitionProvider>
+          <Header />
+          <main className="relative z-10 page-enter">
+            {children}
+          </main>
+          <Footer />
+        </PageTransitionProvider>
       </body>
     </html>
   );

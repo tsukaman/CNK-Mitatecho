@@ -6,33 +6,44 @@ import type { Character } from "@/types";
 interface ShareButtonProps {
   character: Character;
   resultId: string;
+  poem: string | null;
 }
 
-export default function ShareButton({ character, resultId }: ShareButtonProps) {
+export default function ShareButton({ character, resultId, poem }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
 
   const url = typeof window !== "undefined"
     ? `${window.location.origin}/result?id=${resultId}`
     : "";
 
-  const text = `汝の戦国エンジニア格は ${character.name}（${character.title}）\n#風雲戦国見立帖 #千人一首 #CNDNagoya`;
+  // 短歌を上の句(5-7-5)と下の句(7-7)に分けて2行化
+  let kamiNoKu = "";
+  let shimoNoKu = "";
+  if (poem) {
+    const lines = poem.split("\n").map((l) => l.trim()).filter((l) => l.length > 0);
+    kamiNoKu = lines.slice(0, 3).join(" ");
+    shimoNoKu = lines.slice(3).join(" ");
+  }
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: `${character.name} - 風雲戦国見立帖`, text, url });
-      } catch {
-        // User cancelled
-      }
-    } else {
-      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
-      window.open(twitterUrl, "_blank");
-    }
+  const text = [
+    `⚔ 我は【${character.name}】`,
+    `——${character.title}なり`,
+    "",
+    `千人一首【AIがあなたに詠んだ一首】`,
+    kamiNoKu,
+    shimoNoKu,
+    "",
+    "#風雲戦国見立帖 #千人一首 #CloudNativeKaigi",
+  ].join("\n");
+
+  const handleTweet = () => {
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+    window.open(twitterUrl, "_blank");
   };
 
-  const handleCopy = async () => {
+  const handleCopyUrl = async () => {
     try {
-      await navigator.clipboard.writeText(`${text}\n${url}`);
+      await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -43,13 +54,16 @@ export default function ShareButton({ character, resultId }: ShareButtonProps) {
   return (
     <div className="flex gap-2">
       <button
-        onClick={handleShare}
+        onClick={handleTweet}
         className="wa-cta flex-1 rounded-lg px-4 py-3 text-sm font-bold"
       >
-        シェアする
+        <svg viewBox="0 0 24 24" className="inline-block w-4 h-4 mr-1.5 fill-current" aria-hidden="true">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+        </svg>
+        でポスト
       </button>
       <button
-        onClick={handleCopy}
+        onClick={handleCopyUrl}
         className="wa-btn rounded-lg px-4 py-3 text-sm"
       >
         {copied ? "コピー済み" : "URLコピー"}

@@ -21,7 +21,7 @@ export default async function SelectCardPage({ params }: Props) {
 
   if (cardId < 1 || cardId > 6) {
     return (
-      <div className="flex flex-col items-center gap-4 py-12">
+      <div className="mx-auto max-w-lg px-4 pt-20 flex flex-col items-center gap-4 py-12">
         <p className="text-sm text-red-600">無効なカードです</p>
       </div>
     );

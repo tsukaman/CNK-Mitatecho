@@ -22,19 +22,18 @@ const STAGGER = [
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center gap-8">
-      {/* ヒーローセクション */}
-      <section className="relative -mx-4 -mt-20 flex min-h-[60vh] w-[calc(100%+2rem)] items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <Image
-            src="/hero-bg.webp"
-            alt=""
-            fill
-            className="object-cover"
-            priority
-          />
-        </div>
-        <div className="relative z-10 flex flex-col items-center px-4 py-16 text-center">
+    <>
+      {/* ヒーローセクション — 全幅 */}
+      <section className="relative w-full min-h-[28vh] sm:min-h-[32vh] overflow-hidden">
+        <Image
+          src="/hero-bg.webp"
+          alt=""
+          fill
+          className="object-cover object-center"
+          sizes="100vw"
+          priority
+        />
+        <div className="relative z-10 flex min-h-[28vh] sm:min-h-[32vh] flex-col items-center justify-center px-4 pt-24 pb-8 text-center">
           <Image
             src="/logo-compact.png"
             alt="クラウドネイティブ会議"
@@ -46,19 +45,22 @@ export default function Home() {
           <TitleLogo />
           <div className="kinpaku-line mx-auto mt-4 w-32" />
           <p className="mt-4 text-sm font-bold text-sumi-800 drop-shadow-[0_1px_2px_rgba(255,255,255,0.9)]">
-            汝の戦国エンジニア格を占わん
+            汝の心に宿る戦国の魂、見定めん
           </p>
         </div>
       </section>
 
-      {/* カード選択セクション */}
-      <p className="text-center text-xs text-sumi-500">
-        直感で一枚、選ばれよ
-      </p>
+      {/* 黒帯セクション — 全幅 */}
+      <div className="w-full bg-sumi-950 py-5">
+        <p className="text-center text-base font-bold tracking-[0.25em] text-washi-100" style={{ fontFamily: "var(--font-zen)" }}>
+          直感で一枚、選ばれよ
+        </p>
+      </div>
 
-      <div className="relative grid w-full grid-cols-2 gap-3">
+      {/* カード選択セクション */}
+      <div className="relative mx-auto max-w-lg px-4 pb-8 flex flex-col items-center gap-8 pt-10">
         {/* 墨絵城 装飾背景 */}
-        <div className="pointer-events-none absolute -bottom-8 -right-4 z-0 w-48 opacity-[0.06]">
+        <div className="pointer-events-none absolute bottom-0 -right-16 z-0 w-72 opacity-[0.12]">
           <Image
             src="/nagoya-castle-ink.png"
             alt=""
@@ -67,35 +69,37 @@ export default function Home() {
             className="object-contain"
           />
         </div>
-        {CARDS.map((card, i) => (
-          <Link
-            key={card.id}
-            href={`/select/${card.id}`}
-            className={`cnk-card group relative z-10 flex flex-col items-center gap-2 p-4 ${STAGGER[i]}`}
-            style={{ borderTopColor: card.colorCode, borderTopWidth: "3px" }}
-          >
-            <span
-              className="text-3xl font-black transition-all duration-300 group-hover:scale-110"
-              style={{ color: card.colorCode }}
-            >
-              {card.kanji}
-            </span>
-            <span className="text-xs font-bold text-sumi-900">
-              {card.name}の巻
-            </span>
-            <span className="text-[10px] text-sumi-500">
-              {card.stage}
-            </span>
-          </Link>
-        ))}
-      </div>
 
-      <div className="animate-fade-in rounded-lg border border-sumi-200 bg-washi-200 p-4 text-center">
-        <p className="text-xs text-sumi-500">
-          プレーリーカードをお持ちの方は<br />
-          カードをかざして診断を始めてください
-        </p>
+        <div className="relative z-10 grid w-full grid-cols-2 gap-3">
+          {CARDS.map((card, i) => (
+            <Link
+              key={card.id}
+              href={`/select/${card.id}`}
+              className={`cnk-card group relative flex flex-col items-center gap-2 p-4 ${STAGGER[i]}`}
+              style={{ borderTopColor: card.colorCode, borderTopWidth: "3px" }}
+            >
+              <span
+                className="text-4xl font-black transition-all duration-300 group-hover:scale-110"
+                style={{ color: card.colorCode }}
+              >
+                {card.kanji}
+              </span>
+              <span className="text-sm font-bold text-sumi-900">
+                {card.name}の巻
+              </span>
+              <span className="text-xs text-sumi-600">
+                {card.stage}
+              </span>
+            </Link>
+          ))}
+        </div>
+
+        <div className="relative z-10 mt-4 animate-fade-in rounded-lg border border-sumi-200 bg-washi-200/80 backdrop-blur-sm p-4 text-center">
+          <p className="text-xs text-sumi-400">
+            本診断はイベントを楽しむための余興です。<br />結果はあくまでお遊びとしてお楽しみください。
+          </p>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

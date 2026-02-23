@@ -4,6 +4,7 @@ export interface Character {
   title: string;
   category: string;
   description: string;
+  history: string;
 }
 
 export interface Q2Question {
@@ -19,6 +20,7 @@ export interface CardScenario {
   q1Choices: string[];
   q2: Record<number, Q2Question>;
   sctTemplate: string;
+  sctInterpretation: string;
 }
 
 export interface SubmitRequest {
@@ -26,8 +28,8 @@ export interface SubmitRequest {
   q1: number;
   q2: number;
   free_text: string;
-  x_account?: string;
-  ogp_include?: boolean;
+  nickname?: string;
+  nickname_public?: boolean;
   q1_choice_text?: string;
   q2_choice_text?: string;
   q2_choice_type?: string;
@@ -56,5 +58,7 @@ export interface ResultData {
 export interface GalleryEntry {
   free_text: string;
   character_id: number;
+  nickname: string | null;
+  nickname_public: number;
   created_at: string;
 }

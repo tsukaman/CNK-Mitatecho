@@ -58,24 +58,33 @@
   --card-shiro: #8a9aad;
 }
 
+html, body {
+  overflow-x: hidden;
+}
+
 body {
   font-family: var(--font-serif);
   background-color: var(--color-washi-100);
   color: var(--color-sumi-950);
 }
 
-/* 和紙テクスチャ背景 */
+/* 和紙テクスチャ背景 + カラーグラデーション */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.08;
-  background-image: url("/texture-washi.webp");
-  background-size: 400px 400px;
-  background-repeat: repeat;
+  background-image:
+    radial-gradient(ellipse at 15% 20%, rgba(84, 138, 138, 0.06), transparent 50%),
+    radial-gradient(ellipse at 85% 80%, rgba(167, 138, 74, 0.06), transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(196, 60, 60, 0.02), transparent 60%),
+    url("/texture-washi.webp");
+  background-size: 100% 100%, 100% 100%, 100% 100%, 300px 300px;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+  opacity: 0.6;
 }
+
 
 /* === 共通ボタン: セカンダリ === */
 .wa-btn {
@@ -203,4 +212,28 @@ body::before {
 }
 .animate-gold-pulse {
   animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* === ページ遷移トランジション === */
+@keyframes transitionFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.page-transition-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background-color: white;
+  animation: transitionFadeIn 0.8s ease-in forwards;
+  pointer-events: all;
+}
+
+/* ページ読み込み時のフェードイン */
+@keyframes pageEnter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.page-enter {
+  animation: pageEnter 0.6s ease-out both;
+  animation-delay: 0.1s;
 }

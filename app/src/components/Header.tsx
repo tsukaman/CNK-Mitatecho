@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
 import Image from "next/image";
 
 export default function Header() {
@@ -25,17 +24,23 @@ export default function Header() {
       }`}
       style={{ fontFamily: "var(--font-zen)" }}
     >
-      <div className="mx-auto flex max-w-lg items-center justify-between px-4 h-14">
-        <Link href="/" className="flex items-center gap-2">
+      <div className="flex items-center px-4 h-14">
+        <a href="https://kaigi.cloudnativedays.jp/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
           <Image
-            src="/logo-compact.png"
-            alt="クラウドネイティブ会議"
+            src="/cnk-icon.png"
+            alt=""
             width={32}
             height={32}
             className="h-8 w-8 object-contain"
           />
-          <span className="text-sm font-bold text-sumi-900">千人一首</span>
-        </Link>
+          <Image
+            src="/logo-wide.png"
+            alt="クラウドネイティブ会議"
+            width={160}
+            height={24}
+            className="h-5 w-auto object-contain"
+          />
+        </a>
       </div>
     </header>
   );
