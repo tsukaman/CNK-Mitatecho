@@ -72,7 +72,9 @@ npx wrangler d1 execute prairie-cnk-db --file=schema.sql  # DB初期化
 
 - `POST /api/submit` — 回答送信 → D1保存 + LLM短歌生成(非同期)
 - `GET /api/result/[id]` — 結果取得
-- `GET /api/gallery?card=[1-6]` — ギャラリー（最新2首+ランダム3首）
+- `GET /api/gallery?card=[1-6]` — ギャラリー（最新3件+ランダム5件）
+- `GET /api/admin/list?card=[1-6]` — 管理者用投稿一覧（要APIキー）
+- `DELETE /api/admin/delete/[id]` — 管理者用投稿削除（要APIキー）
 
 ## コーディング規約
 
@@ -81,6 +83,25 @@ npx wrangler d1 execute prairie-cnk-db --file=schema.sql  # DB初期化
 - データ定義は `src/lib/` に配置
 - API関数は `functions/api/` に配置（Cloudflare Functions形式）
 - 和風デザイン：カスタムカラー (紅/藍/翠/金/紫/白) を使用
+
+## Gitワークフロー
+
+- mainブランチに直接コミット&プッシュ（一人開発）
+- **プッシュ前に必ずdiffレビューを実施すること**
+  - 機密情報（APIキー、トークン）が含まれていないか確認
+  - コード品質・セキュリティの確認
+- フロー: コード変更 → コミット → レビュー → 問題あれば修正 → プッシュ
+
+## 管理ツール
+
+```bash
+./admin.sh list [card]     # 投稿一覧（card省略で全件）
+./admin.sh show <id>       # 投稿詳細
+./admin.sh delete <id>     # 確認付き削除
+```
+
+- APIキーは `app/.dev.vars` の `ADMIN_API_KEY` から自動読み込み
+- 本番URLは環境変数 `MITATECHO_URL` で変更可（デフォルト: https://cnk-mitatecho.pages.dev）
 
 ## 注意事項
 

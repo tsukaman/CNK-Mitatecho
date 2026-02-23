@@ -78,6 +78,6 @@ export async function onRequestPost(context) {
     return successResponse({ id, character_id });
   } catch (err) {
     console.error('Submit error:', err.message, err.stack);
-    return errorResponse(`Internal server error: ${err.message}`, 500);
+    return errorResponse('Internal server error', 500);
   }
 }
