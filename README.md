@@ -2,7 +2,7 @@
 
 > ⚔ 汝の心に宿る戦国の魂、見定めん
 
-CloudNative Days / SRE Kaigi / Platform Engineering Kaigi 合同イベント（2026年5月14-15日 / 名古屋）向けの心理テスト型エンターテインメントWebアプリ。
+クラウドネイティブ会議（CloudNative Days / SRE Kaigi / Platform Engineering Kaigi 合同イベント、2026年5月14-15日 / 名古屋）向けの心理テスト型エンターテインメントWebアプリ。
 
 プレーリーカード（NFC）をかざして心理テストに回答すると、あなたにぴったりの戦国武将エンジニアタイプが診断され、AIがあなただけの短歌を詠みます。
 

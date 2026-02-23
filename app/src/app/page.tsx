@@ -1,6 +1,14 @@
+"use client";
+
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import TitleLogo from "@/components/TitleLogo";
+import { api } from "@/lib/api-client";
+import { getCharacter } from "@/lib/characters";
+import { SCENARIOS } from "@/lib/scenarios";
+import type { PoemEntry } from "@/types";
 
 const CARDS = [
   { id: 1, name: "壱", color: "紅", colorCode: "#c43c3c", kanji: "紅", stage: "合戦前夜の陣中" },
@@ -20,10 +28,161 @@ const STAGGER = [
   "animate-fade-in-d6",
 ];
 
-export default function Home() {
+/** 千人一首ギャラリー */
+function PoemGallery() {
+  const [poems, setPoems] = useState<PoemEntry[]>([]);
+
+  useEffect(() => {
+    api.getPoems(12).then((data) => setPoems(data.entries)).catch(() => {});
+  }, []);
+
+  if (poems.length === 0) return null;
+
+  return (
+    <div className="mx-auto max-w-lg px-4 py-10">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="h-px flex-1 bg-sumi-200" />
+        <p className="text-sm font-bold text-sumi-500 tracking-widest shrink-0" style={{ fontFamily: "var(--font-zen)" }}>
+          千人一首 ── これまでに詠まれた歌
+        </p>
+        <div className="h-px flex-1 bg-sumi-200" />
+      </div>
+
+      <div className="flex flex-col gap-4">
+        {poems.map((entry, i) => {
+          const lines = entry.poem.split("\n").map((l) => l.trim()).filter((l) => l.length > 0);
+          const kamiNoKu = lines.slice(0, 3).join(" ");
+          const shimoNoKu = lines.slice(3).join(" ");
+          const scenario = SCENARIOS[entry.card_id];
+          let charName = "";
+          try { charName = getCharacter(entry.character_id).name; } catch { /* skip */ }
+          const displayName = entry.nickname_public && entry.nickname ? entry.nickname : null;
+
+          return (
+            <div
+              key={i}
+              className="poem-box relative overflow-hidden rounded-lg p-5 animate-fade-in"
+            >
+              <div className="text-center" style={{ fontFamily: "var(--font-poem)" }}>
+                <p className="text-base leading-loose tracking-wider text-sumi-800">
+                  {kamiNoKu}
+                </p>
+                <p className="text-base leading-loose tracking-wider text-sumi-800">
+                  {shimoNoKu}
+                </p>
+              </div>
+              <div className="mt-3 flex items-center justify-center gap-2 text-xs text-sumi-400">
+                {scenario && (
+                  <span style={{ color: scenario.colorCode }}>●</span>
+                )}
+                <span style={{ fontFamily: "var(--font-brush)" }}>{charName}</span>
+                {displayName && <span>── {displayName}</span>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/** ランディングページ（デフォルト表示） */
+function PrairieCardLanding() {
   return (
     <>
-      {/* ヒーローセクション — 全幅 */}
+      {/* ヒーロー */}
+      <section className="relative w-full min-h-[50vh] sm:min-h-[60vh] overflow-hidden">
+        <Image
+          src="/hero-bg.webp"
+          alt=""
+          fill
+          className="object-cover object-center"
+          sizes="100vw"
+          priority
+        />
+        <div className="relative z-10 flex min-h-[50vh] sm:min-h-[60vh] flex-col items-center justify-center px-4 pt-24 pb-8 text-center">
+          <Image
+            src="/logo-compact.png"
+            alt="クラウドネイティブ会議"
+            width={120}
+            height={120}
+            className="mb-6 drop-shadow-lg"
+            priority
+          />
+          <TitleLogo />
+          <div className="kinpaku-line mx-auto mt-4 w-32" />
+          <p className="mt-6 text-sm font-bold text-sumi-800 drop-shadow-[0_1px_2px_rgba(255,255,255,0.9)]">
+            汝の心に宿る戦国の魂、見定めん
+          </p>
+        </div>
+      </section>
+
+      {/* コンセプト説明 */}
+      <div className="w-full bg-sumi-950 py-8">
+        <div className="mx-auto max-w-lg px-4">
+          <p
+            className="text-center text-base font-bold tracking-[0.2em] text-washi-100 leading-relaxed"
+            style={{ fontFamily: "var(--font-zen)" }}
+          >
+            戦国武将 × エンジニアタイプ診断
+          </p>
+          <p className="mt-4 text-center text-sm text-sumi-400 leading-relaxed">
+            心理学の投影法をベースにした問答を通じて、<br />
+            あなたの心に宿る戦国の人物像を導き出します。<br />
+            さらにAIがあなただけの短歌を一首、詠みます。
+          </p>
+        </div>
+      </div>
+
+      {/* 体験の流れ */}
+      <div className="mx-auto max-w-lg px-4 py-10">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="h-px flex-1 bg-sumi-200" />
+          <p className="text-sm font-bold text-sumi-500 tracking-widest shrink-0" style={{ fontFamily: "var(--font-zen)" }}>
+            体験の流れ
+          </p>
+          <div className="h-px flex-1 bg-sumi-200" />
+        </div>
+
+        <div className="flex flex-col gap-3">
+          {[
+            { step: "壱", text: "プレーリーカードをかざして巻を選ぶ" },
+            { step: "弐", text: "戦国の世界観に沿った三つの問いに答える" },
+            { step: "参", text: "あなたに見立てられた戦国武将が明かされる" },
+            { step: "肆", text: "AIがあなただけの短歌を詠む" },
+          ].map(({ step, text }) => (
+            <div key={step} className="flex items-start gap-3 rounded-lg bg-white p-4 border border-sumi-100">
+              <span className="text-lg font-black text-beni-600 shrink-0" style={{ fontFamily: "var(--font-brush)" }}>{step}</span>
+              <p className="text-sm text-sumi-700 leading-relaxed">{text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 千人一首ギャラリー */}
+      <PoemGallery />
+
+      {/* イベント情報 */}
+      <div className="mx-auto max-w-lg px-4 pb-10">
+        <div className="rounded-lg border border-sumi-200 bg-washi-200/80 backdrop-blur-sm p-6 text-center">
+          <p className="text-sm text-sumi-600 leading-relaxed">
+            風雲戦国見立帖は、実行委員ブースにある<br className="hidden sm:inline" />
+            プレーリーカードを読み取ることで体験することができます。
+          </p>
+          <p className="mt-3 text-xs text-sumi-400">
+            クラウドネイティブ会議<br />
+            2026年5月14-15日 @ 名古屋
+          </p>
+        </div>
+      </div>
+    </>
+  );
+}
+
+/** カード選択ページ（?mode=remote 時に表示） */
+function CardSelect() {
+  return (
+    <>
       <section className="relative w-full min-h-[28vh] sm:min-h-[32vh] overflow-hidden">
         <Image
           src="/hero-bg.webp"
@@ -50,16 +209,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 黒帯セクション — 全幅 */}
       <div className="w-full bg-sumi-950 py-5">
         <p className="text-center text-base font-bold tracking-[0.25em] text-washi-100" style={{ fontFamily: "var(--font-zen)" }}>
           直感で一枚、選ばれよ
         </p>
       </div>
 
-      {/* カード選択セクション */}
       <div className="relative mx-auto max-w-lg px-4 pb-8 flex flex-col items-center gap-8 pt-10">
-        {/* 墨絵城 装飾背景 */}
         <div className="pointer-events-none absolute bottom-0 -right-16 z-0 w-72 opacity-[0.12]">
           <Image
             src="/nagoya-castle-ink.png"
@@ -80,11 +236,11 @@ export default function Home() {
             >
               <span
                 className="text-4xl font-black transition-all duration-300 group-hover:scale-110"
-                style={{ color: card.colorCode }}
+                style={{ color: card.colorCode, fontFamily: "var(--font-brush)" }}
               >
                 {card.kanji}
               </span>
-              <span className="text-sm font-bold text-sumi-900">
+              <span className="text-sm font-bold text-sumi-900" style={{ fontFamily: "var(--font-brush)" }}>
                 {card.name}の巻
               </span>
               <span className="text-xs text-sumi-600">
@@ -101,5 +257,20 @@ export default function Home() {
         </div>
       </div>
     </>
+  );
+}
+
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const isRemote = searchParams.get("mode") === "remote";
+
+  return isRemote ? <CardSelect /> : <PrairieCardLanding />;
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<p className="text-center text-sm text-sumi-400 pt-32">読み込み中...</p>}>
+      <HomeContent />
+    </Suspense>
   );
 }

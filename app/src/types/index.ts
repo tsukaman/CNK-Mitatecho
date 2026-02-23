@@ -62,3 +62,12 @@ export interface GalleryEntry {
   nickname_public: number;
   created_at: string;
 }
+
+export interface PoemEntry {
+  poem: string;
+  character_id: number;
+  card_id: number;
+  nickname: string | null;
+  nickname_public: number;
+  created_at: string;
+}

@@ -8,7 +8,7 @@
 
 ## 概要
 
-CloudNative Days / SRE Kaigi / Platform Engineering Kaigi 合同イベント（2026年5月14-15日 / 名古屋・中日ホール）にて、
+クラウドネイティブ会議（2026年5月14-15日 / 名古屋）にて、
 プレーリーカードを活用した心理テスト型エンターテインメント体験を提供する。
 
 参加者がカードを読み取ると、投影法をベースにした心理テストが始まり、
@@ -17,9 +17,9 @@ CloudNative Days / SRE Kaigi / Platform Engineering Kaigi 合同イベント（2
 
 ## イベント背景
 
-- **CloudNative Days / SRE Kaigi / Platform Engineering Kaigi** の3カンファレンス合同開催
-- 名古屋で初の合同開催、目標1,000人規模
-- 3つの技術領域が交差する場での交流促進が狙い
+- **クラウドネイティブ会議**（CloudNative Days / SRE Kaigi / Platform Engineering Kaigi 合同イベント）
+- 名古屋で初開催、目標1,000人規模
+- 複数の技術領域が交差する場での交流促進が狙い
 
 ## デザインコンセプト
 

@@ -136,11 +136,11 @@ export default function ResultDisplay({ result, character }: ResultDisplayProps)
               <Image src="/brush-stroke.webp" alt="" width={256} height={256} />
             </div>
             <p className="relative z-10 text-xs font-bold text-rokusyo-700">千人一首 ── AIがあなたに詠んだ一首</p>
-            <div className="relative z-10 mt-4 text-center" style={{ fontFamily: "var(--font-zen)" }}>
-              <p className="text-base leading-loose tracking-wider text-sumi-800">
+            <div className="relative z-10 mt-4 text-center" style={{ fontFamily: "var(--font-poem)" }}>
+              <p className="text-lg leading-loose tracking-wider text-sumi-800">
                 {kamiNoKu}
               </p>
-              <p className="mt-1 text-base leading-loose tracking-wider text-sumi-800">
+              <p className="mt-1 text-lg leading-loose tracking-wider text-sumi-800">
                 {shimoNoKu}
               </p>
             </div>
@@ -170,7 +170,7 @@ export default function ResultDisplay({ result, character }: ResultDisplayProps)
               }}
             >
               <p className="text-xs font-bold tracking-wider" style={{ color: "var(--card-midori)" }}>相性の良い人物</p>
-              <p className="mt-1 text-base font-bold text-sumi-900">{compatCharacter.name}</p>
+              <p className="mt-1 text-lg font-bold text-sumi-900" style={{ fontFamily: "var(--font-brush)" }}>{compatCharacter.name}</p>
               <p className="text-sm" style={{ color: "var(--card-midori)" }}>「{compatCharacter.title}」</p>
               <p className="mt-2 text-sm text-sumi-600">{compatibility.reason}</p>
             </div>
@@ -184,7 +184,7 @@ export default function ResultDisplay({ result, character }: ResultDisplayProps)
               }}
             >
               <p className="text-xs font-bold tracking-wider text-beni-700">好敵手</p>
-              <p className="mt-1 text-base font-bold text-sumi-900">{rivalCharacter.name}</p>
+              <p className="mt-1 text-lg font-bold text-sumi-900" style={{ fontFamily: "var(--font-brush)" }}>{rivalCharacter.name}</p>
               <p className="text-sm text-beni-700">「{rivalCharacter.title}」</p>
               <p className="mt-2 text-sm text-sumi-600">{rivalry.reason}</p>
             </div>

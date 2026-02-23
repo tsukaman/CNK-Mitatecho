@@ -2,7 +2,7 @@
 
 ## プロジェクト概要
 
-CloudNative Days / SRE Kaigi / Platform Engineering Kaigi 合同イベント（2026年5月14-15日 / 名古屋）向けの心理テスト型エンターテインメントWebアプリ。
+クラウドネイティブ会議（CloudNative Days / SRE Kaigi / Platform Engineering Kaigi 合同イベント、2026年5月14-15日 / 名古屋）向けの心理テスト型エンターテインメントWebアプリ。
 
 プレーリーカード（NFC）を読み取り → 心理テスト → 戦国武将に見立てたエンジニアタイプ診断 + AI短歌生成。
 

@@ -1,4 +1,4 @@
-import type { SubmitRequest, SubmitResponse, ResultData, GalleryEntry } from "@/types";
+import type { SubmitRequest, SubmitResponse, ResultData, GalleryEntry, PoemEntry } from "@/types";
 
 const API_BASE =
   process.env.NODE_ENV === "development"
@@ -29,5 +29,9 @@ export const api = {
 
   async getGallery(card: number): Promise<{ entries: GalleryEntry[] }> {
     return fetchJSON(`${API_BASE}/gallery?card=${card}`);
+  },
+
+  async getPoems(limit = 12): Promise<{ entries: PoemEntry[] }> {
+    return fetchJSON(`${API_BASE}/poems?limit=${limit}`);
   },
 };
