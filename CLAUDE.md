@@ -15,7 +15,6 @@ CNK-Mitatecho/
 ├── CHARACTERS.md      # 32人の武将キャラクター定義
 ├── MAPPING.md         # 96パターン→32武将のマッピング
 ├── SCENARIOS.md       # 6カード×Q1/Q2のシナリオ・選択肢
-├── home-full.png      # ホーム画面デザイン参考
 ├── references/        # 参考資料
 └── app/               # Next.js アプリケーション本体
     ├── src/            # ソースコード
