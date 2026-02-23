@@ -119,7 +119,7 @@ function ResultContent() {
         <div className="mx-auto mt-4 mb-3 w-16 h-px" style={{ backgroundColor: scenario?.colorCode }} />
         <h2
           className="text-center text-4xl font-black tracking-[0.15em] text-washi-100"
-          style={{ fontFamily: "var(--font-zen)", textShadow: `0 0 24px ${scenario?.colorCode || "#c43c3c"}80` }}
+          style={{ fontFamily: "var(--font-brush)", textShadow: `0 0 24px ${scenario?.colorCode || "#c43c3c"}80` }}
         >
           {character.name}
         </h2>
