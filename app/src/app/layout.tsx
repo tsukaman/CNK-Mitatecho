@@ -5,9 +5,20 @@ import Footer from "@/components/Footer";
 import PageTransitionProvider from "@/components/PageTransition";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://cnk-mitatecho.pages.dev"),
   title: "風雲戦国見立帖 〜千人一首〜",
   description: "戦国人物 × エンジニアタイプ診断 + AIパーソナライズ短歌 ── プレーリーカード × クラウドネイティブ会議 2026",
   icons: { icon: "/favicon.png", apple: "/cnk-icon.png" },
+  openGraph: {
+    title: "風雲戦国見立帖 〜千人一首〜",
+    description: "戦国武将 × エンジニアタイプ診断 + AIパーソナライズ短歌",
+    images: ["/og-image.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "風雲戦国見立帖 〜千人一首〜",
+    description: "戦国武将 × エンジニアタイプ診断 + AIパーソナライズ短歌",
+  },
 };
 
 export default function RootLayout({
