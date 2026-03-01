@@ -7,6 +7,7 @@ import Image from "next/image";
 import TitleLogo from "@/components/TitleLogo";
 import { api } from "@/lib/api-client";
 import { getCharacter } from "@/lib/characters";
+import { splitPoem } from "@/lib/poem-utils";
 import { SCENARIOS } from "@/lib/scenarios";
 import type { PoemEntry } from "@/types";
 
@@ -33,7 +34,7 @@ function PoemGallery() {
   const [poems, setPoems] = useState<PoemEntry[]>([]);
 
   useEffect(() => {
-    api.getPoems(12).then((data) => setPoems(data.entries)).catch(() => {});
+    api.getPoems(12).then((data) => setPoems(data.entries)).catch((err) => console.error('Failed to load poems:', err));
   }, []);
 
   if (poems.length === 0) return null;
@@ -50,9 +51,7 @@ function PoemGallery() {
 
       <div className="flex flex-col gap-4">
         {poems.map((entry, i) => {
-          const lines = entry.poem.split("\n").map((l) => l.trim()).filter((l) => l.length > 0);
-          const kamiNoKu = lines.slice(0, 3).join(" ");
-          const shimoNoKu = lines.slice(3).join(" ");
+          const { kamiNoKu, shimoNoKu } = splitPoem(entry.poem);
           const scenario = SCENARIOS[entry.card_id];
           let charName = "";
           try { charName = getCharacter(entry.character_id).name; } catch { /* skip */ }

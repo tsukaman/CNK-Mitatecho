@@ -3,6 +3,7 @@
 import Image from "next/image";
 import type { Character, ResultData } from "@/types";
 import { getCharacter } from "@/lib/characters";
+import { splitPoem } from "@/lib/poem-utils";
 import { COMPATIBILITY, RIVALRY } from "@/lib/relationships";
 import { SCENARIOS } from "@/lib/scenarios";
 
@@ -126,9 +127,7 @@ export default function ResultDisplay({ result, character }: ResultDisplayProps)
       {/* 短歌 */}
       {result.poem ? (() => {
         // 5行の短歌を上の句(5-7-5)と下の句(7-7)に分割
-        const lines = result.poem.split('\n').map((l: string) => l.trim()).filter((l: string) => l.length > 0);
-        const kamiNoKu = lines.slice(0, 3).join(' ');
-        const shimoNoKu = lines.slice(3).join(' ');
+        const { kamiNoKu, shimoNoKu } = splitPoem(result.poem);
         return (
           <div className="poem-box relative overflow-hidden rounded-lg p-6 animate-fade-in-d3">
             {/* 筆ストローク装飾 */}

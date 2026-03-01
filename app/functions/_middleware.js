@@ -6,6 +6,9 @@ const SITE_URL = 'https://cnk-mitatecho.pages.dev';
 const SITE_TITLE = '風雲戦国見立帖 〜千人一首〜';
 const SITE_DESC = '戦国武将 × エンジニアタイプ診断 + AIパーソナライズ短歌';
 
+// TODO: OGP画像が準備できたら true に変更
+const ENABLE_OGP_BOT_DETECTION = false;
+
 function escapeHtml(str) {
   return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
@@ -32,8 +35,7 @@ export async function onRequest(context) {
   const url = new URL(request.url);
   const ua = request.headers.get('user-agent') || '';
 
-  // Bot detection for /result page (OGP画像ができたら有効化)
-  if (false && url.pathname === '/result' && BOT_UA_PATTERN.test(ua)) {
+  if (ENABLE_OGP_BOT_DETECTION && url.pathname === '/result' && BOT_UA_PATTERN.test(ua)) {
     const id = url.searchParams.get('id');
     if (id && env.DB) {
       try {
@@ -57,7 +59,7 @@ export async function onRequest(context) {
           }
         }
       } catch (e) {
-        // Fall through to normal response
+        console.error('OGP generation error:', e);
       }
     }
   }

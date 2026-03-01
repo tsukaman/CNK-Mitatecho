@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Character } from "@/types";
+import { splitPoem } from "@/lib/poem-utils";
 
 interface ShareButtonProps {
   character: Character;
@@ -16,14 +17,9 @@ export default function ShareButton({ character, resultId, poem }: ShareButtonPr
     ? `${window.location.origin}/result?id=${resultId}`
     : "";
 
-  // 短歌を上の句(5-7-5)と下の句(7-7)に分けて2行化
-  let kamiNoKu = "";
-  let shimoNoKu = "";
-  if (poem) {
-    const lines = poem.split("\n").map((l) => l.trim()).filter((l) => l.length > 0);
-    kamiNoKu = lines.slice(0, 3).join(" ");
-    shimoNoKu = lines.slice(3).join(" ");
-  }
+  const { kamiNoKu, shimoNoKu } = poem
+    ? splitPoem(poem)
+    : { kamiNoKu: "", shimoNoKu: "" };
 
   const text = [
     `⚔ 我は【${character.name}】`,
