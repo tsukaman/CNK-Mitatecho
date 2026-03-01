@@ -14,7 +14,7 @@ function sleep(ms) {
  * - 各行がそれっぽい文字数であること（漢字混じりなので厳密な音数は不問）
  * - 説明文や余計なテキストが混じっていないこと
  */
-function validatePoem(poem) {
+export function validatePoem(poem) {
   const lines = poem.split('\n').filter(l => l.trim().length > 0);
 
   // 5行構成チェック

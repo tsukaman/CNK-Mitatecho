@@ -9,7 +9,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "nanoid": "^5.1.6",
@@ -24,6 +26,7 @@
     "@types/react-dom": "^19",
     "tailwindcss": "^4",
     "typescript": "^5",
+    "vitest": "^4.0.18",
     "wrangler": "^4.43.0"
   }
 }
