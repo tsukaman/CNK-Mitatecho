@@ -9,6 +9,7 @@ import { api } from "@/lib/api-client";
 import { getCharacter } from "@/lib/characters";
 import { splitPoem } from "@/lib/poem-utils";
 import { SCENARIOS } from "@/lib/scenarios";
+import { getCardSlug } from "@/lib/tokens";
 import type { PoemEntry } from "@/types";
 
 const CARDS = [
@@ -229,7 +230,7 @@ function CardSelect() {
           {CARDS.map((card, i) => (
             <Link
               key={card.id}
-              href={`/select/${card.id}`}
+              href={`/select/${getCardSlug(card.id)}`}
               className={`cnk-card group relative flex flex-col items-center gap-2 p-4 ${STAGGER[i]}`}
               style={{ borderTopColor: card.colorCode, borderTopWidth: "3px" }}
             >

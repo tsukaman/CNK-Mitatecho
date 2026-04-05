@@ -56,4 +56,30 @@ export function getToken(card: number, q1: number): string | null {
   return REVERSE_TOKEN_MAP[`${card}-${q1}`] || null;
 }
 
-export { TOKEN_MAP, REVERSE_TOKEN_MAP };
+/**
+ * Card slug mapping: random 6-char slugs for /select/ URLs.
+ * Prevents sequential card ID guessing.
+ */
+const CARD_SLUG_MAP: Record<string, number> = {
+  "xT3mKw": 1,
+  "qR8nLv": 2,
+  "hJ5pYa": 3,
+  "bW2cFg": 4,
+  "dN9sXe": 5,
+  "zV6rMu": 6,
+};
+
+const REVERSE_CARD_SLUG_MAP: Record<number, string> = {};
+for (const [slug, cardId] of Object.entries(CARD_SLUG_MAP)) {
+  REVERSE_CARD_SLUG_MAP[cardId] = slug;
+}
+
+export function resolveCardSlug(slug: string): number | null {
+  return CARD_SLUG_MAP[slug] ?? null;
+}
+
+export function getCardSlug(cardId: number): string | null {
+  return REVERSE_CARD_SLUG_MAP[cardId] ?? null;
+}
+
+export { TOKEN_MAP, REVERSE_TOKEN_MAP, CARD_SLUG_MAP };

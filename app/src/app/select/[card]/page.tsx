@@ -1,14 +1,8 @@
 import SelectCardClient from "./SelectCardClient";
+import { CARD_SLUG_MAP, resolveCardSlug } from "@/lib/tokens";
 
 export function generateStaticParams() {
-  return [
-    { card: "1" },
-    { card: "2" },
-    { card: "3" },
-    { card: "4" },
-    { card: "5" },
-    { card: "6" },
-  ];
+  return Object.keys(CARD_SLUG_MAP).map((slug) => ({ card: slug }));
 }
 
 interface Props {
@@ -17,9 +11,9 @@ interface Props {
 
 export default async function SelectCardPage({ params }: Props) {
   const { card } = await params;
-  const cardId = parseInt(card, 10);
+  const cardId = resolveCardSlug(card);
 
-  if (cardId < 1 || cardId > 6) {
+  if (!cardId) {
     return (
       <div className="mx-auto max-w-lg px-4 pt-20 flex flex-col items-center gap-4 py-12">
         <p className="text-sm text-red-600">無効なカードです</p>
