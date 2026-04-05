@@ -1,20 +1,11 @@
-import { handleOptions } from '../../utils/cors.js';
 import { successResponse, errorResponse } from '../../utils/response.js';
 
-export async function onRequestOptions() {
-  return handleOptions();
-}
+// 認証は _middleware.js で一元処理
 
 export async function onRequestGet(context) {
   const { request, env } = context;
 
   try {
-    // 認証チェック
-    const authHeader = request.headers.get('Authorization');
-    if (!env.ADMIN_API_KEY || authHeader !== `Bearer ${env.ADMIN_API_KEY}`) {
-      return errorResponse('Unauthorized', 401);
-    }
-
     const url = new URL(request.url);
     const card = url.searchParams.get('card');
 

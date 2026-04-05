@@ -1,20 +1,11 @@
-import { handleOptions } from '../../../utils/cors.js';
 import { successResponse, errorResponse } from '../../../utils/response.js';
 
-export async function onRequestOptions() {
-  return handleOptions();
-}
+// 認証は _middleware.js で一元処理
 
 export async function onRequestDelete(context) {
-  const { request, env, params } = context;
+  const { env, params } = context;
 
   try {
-    // 認証チェック
-    const authHeader = request.headers.get('Authorization');
-    if (!env.ADMIN_API_KEY || authHeader !== `Bearer ${env.ADMIN_API_KEY}`) {
-      return errorResponse('Unauthorized', 401);
-    }
-
     const { id } = params;
     if (!id || typeof id !== 'string') {
       return errorResponse('Invalid id', 400);
