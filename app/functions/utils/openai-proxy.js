@@ -6,6 +6,7 @@
 const OPENROUTER_MODEL_MAPPING = {
   'gpt-4o': 'openai/gpt-4o',
   'gpt-4o-mini': 'openai/gpt-4o-mini',
+  'gpt-4.1-mini': 'openai/gpt-4.1-mini',
   'gpt-5-mini': 'openai/gpt-5-mini',
 };
 
