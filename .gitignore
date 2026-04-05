@@ -8,6 +8,7 @@ references/
 *.log
 .DS_Store
 .playwright-mcp/
+.serena/
 *.tsbuildinfo
 # スクリーンショット参考画像
 /*.png
