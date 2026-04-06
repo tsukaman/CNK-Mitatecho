@@ -408,65 +408,67 @@ export default function AdminDashboard() {
         </table>
       </div>
 
-      {/* 詳細パネル */}
+      {/* 詳細モーダル */}
       {selectedEntry && (
-        <div className="mt-6 rounded-lg border border-sumi-200 bg-white p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <h2 className="text-sm font-bold text-sumi-700">投稿詳細</h2>
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40" onClick={() => setSelectedEntry(null)}>
+          <div className="mx-4 w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-lg bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-sm font-bold text-sumi-700">投稿詳細</h2>
+                {selectedEntry.is_hidden ? (
+                  <span className="text-[10px] bg-red-50 text-red-600 px-1.5 py-0.5 rounded">非表示</span>
+                ) : (
+                  <span className="text-[10px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded">公開中</span>
+                )}
+              </div>
+              <button onClick={() => setSelectedEntry(null)} className="text-sumi-400 hover:text-sumi-600 text-lg leading-none">&times;</button>
+            </div>
+            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+              <dt className="text-sumi-500 font-bold">ID</dt>
+              <dd className="font-mono text-xs">{selectedEntry.id}</dd>
+              <dt className="text-sumi-500 font-bold">巻</dt>
+              <dd><span style={{ color: CARD_LABELS.find((c) => c.id === selectedEntry.card_id)?.color }}>{CARD_LABELS.find((c) => c.id === selectedEntry.card_id)?.label}</span></dd>
+              <dt className="text-sumi-500 font-bold">武将</dt>
+              <dd style={{ fontFamily: "var(--font-brush)" }}>{getCharacterName(selectedEntry.character_id)}<span className="text-sumi-400 text-xs ml-2">(#{selectedEntry.character_id})</span></dd>
+              <dt className="text-sumi-500 font-bold">ニックネーム</dt>
+              <dd>
+                {selectedEntry.nickname || <span className="text-sumi-300">なし</span>}
+                {selectedEntry.nickname && <span className="ml-2 text-xs text-sumi-400">({selectedEntry.nickname_public ? "公開" : "非公開"})</span>}
+              </dd>
+              <dt className="text-sumi-500 font-bold">自由記述</dt>
+              <dd className="whitespace-pre-wrap">{selectedEntry.free_text}</dd>
+              <dt className="text-sumi-500 font-bold">短歌</dt>
+              <dd style={{ fontFamily: "var(--font-poem)" }}>{selectedEntry.poem || <span className="text-sumi-300">未生成</span>}</dd>
+              <dt className="text-sumi-500 font-bold">日時</dt>
+              <dd className="text-xs text-sumi-500">{selectedEntry.created_at}</dd>
+            </dl>
+            <div className="mt-4 pt-4 border-t border-sumi-100 flex justify-end gap-3">
+              <button
+                onClick={() => handleToggleVisibility(selectedEntry)}
+                disabled={toggling === selectedEntry.id}
+                className={`text-xs border rounded px-3 py-1 transition-colors ${selectedEntry.is_hidden ? "text-green-600 border-green-300 hover:bg-green-50" : "text-yellow-600 border-yellow-300 hover:bg-yellow-50"}`}
+              >
+                {selectedEntry.is_hidden ? "表示にする" : "非表示にする"}
+              </button>
+              <button
+                onClick={() => handleEdit(selectedEntry)}
+                className="text-xs text-ai-600 border border-ai-300 rounded px-3 py-1 hover:bg-ai-50 transition-colors"
+              >
+                編集
+              </button>
               {selectedEntry.is_hidden ? (
-                <span className="text-[10px] bg-red-50 text-red-600 px-1.5 py-0.5 rounded">非表示</span>
+                <button
+                  onClick={() => setDeleteTarget(selectedEntry)}
+                  className="text-xs text-red-500 border border-red-300 rounded px-3 py-1 hover:bg-red-50 transition-colors"
+                >
+                  削除
+                </button>
               ) : (
-                <span className="text-[10px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded">公開中</span>
+                <span className="text-xs text-sumi-300 border border-sumi-200 rounded px-3 py-1 cursor-not-allowed" title="削除するには先に非表示にしてください">
+                  削除
+                </span>
               )}
             </div>
-            <button onClick={() => setSelectedEntry(null)} className="text-xs text-sumi-400 hover:text-sumi-600">閉じる</button>
-          </div>
-          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-            <dt className="text-sumi-500 font-bold">ID</dt>
-            <dd className="font-mono text-xs">{selectedEntry.id}</dd>
-            <dt className="text-sumi-500 font-bold">巻</dt>
-            <dd><span style={{ color: CARD_LABELS.find((c) => c.id === selectedEntry.card_id)?.color }}>{CARD_LABELS.find((c) => c.id === selectedEntry.card_id)?.label}</span></dd>
-            <dt className="text-sumi-500 font-bold">武将</dt>
-            <dd style={{ fontFamily: "var(--font-brush)" }}>{getCharacterName(selectedEntry.character_id)}<span className="text-sumi-400 text-xs ml-2">(#{selectedEntry.character_id})</span></dd>
-            <dt className="text-sumi-500 font-bold">ニックネーム</dt>
-            <dd>
-              {selectedEntry.nickname || <span className="text-sumi-300">なし</span>}
-              {selectedEntry.nickname && <span className="ml-2 text-xs text-sumi-400">({selectedEntry.nickname_public ? "公開" : "非公開"})</span>}
-            </dd>
-            <dt className="text-sumi-500 font-bold">自由記述</dt>
-            <dd className="whitespace-pre-wrap">{selectedEntry.free_text}</dd>
-            <dt className="text-sumi-500 font-bold">短歌</dt>
-            <dd style={{ fontFamily: "var(--font-poem)" }}>{selectedEntry.poem || <span className="text-sumi-300">未生成</span>}</dd>
-            <dt className="text-sumi-500 font-bold">日時</dt>
-            <dd className="text-xs text-sumi-500">{selectedEntry.created_at}</dd>
-          </dl>
-          <div className="mt-4 pt-4 border-t border-sumi-100 flex justify-end gap-3">
-            <button
-              onClick={() => handleToggleVisibility(selectedEntry)}
-              disabled={toggling === selectedEntry.id}
-              className={`text-xs border rounded px-3 py-1 transition-colors ${selectedEntry.is_hidden ? "text-green-600 border-green-300 hover:bg-green-50" : "text-yellow-600 border-yellow-300 hover:bg-yellow-50"}`}
-            >
-              {selectedEntry.is_hidden ? "表示にする" : "非表示にする"}
-            </button>
-            <button
-              onClick={() => handleEdit(selectedEntry)}
-              className="text-xs text-ai-600 border border-ai-300 rounded px-3 py-1 hover:bg-ai-50 transition-colors"
-            >
-              編集
-            </button>
-            {selectedEntry.is_hidden ? (
-              <button
-                onClick={() => setDeleteTarget(selectedEntry)}
-                className="text-xs text-red-500 border border-red-300 rounded px-3 py-1 hover:bg-red-50 transition-colors"
-              >
-                削除
-              </button>
-            ) : (
-              <span className="text-xs text-sumi-300 border border-sumi-200 rounded px-3 py-1 cursor-not-allowed" title="削除するには先に非表示にしてください">
-                削除
-              </span>
-            )}
           </div>
         </div>
       )}
