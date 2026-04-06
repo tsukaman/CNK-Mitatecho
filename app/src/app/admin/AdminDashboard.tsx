@@ -177,11 +177,16 @@ export default function AdminDashboard() {
   const handleLogout = () => {
     setAuthToken(null);
     setAuthenticated(false);
-    setUseCFAccess(false);
     setEntries([]);
     setTotal(0);
     setSelectedEntry(null);
     sessionStorage.removeItem("admin_token");
+    if (useCFAccess) {
+      // CF Accessセッションを無効化し、管理画面に戻す
+      setUseCFAccess(false);
+      window.location.href = `https://cnk-mitatecho.cloudflareaccess.com/cdn-cgi/access/logout?returnTo=${encodeURIComponent('https://cnk-mitatecho.pages.dev/admin')}`;
+      return;
+    }
   };
 
   const handleCardFilter = (card: number) => {
