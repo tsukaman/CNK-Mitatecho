@@ -64,9 +64,10 @@ npx wrangler d1 execute prairie-cnk-db --file=schema.sql  # DB初期化
 ## URL設計
 
 - `/` — カード選択ランディング（フォールバック用）
-- `/select/[card]` — Q1表示（プレーリーカードからもここに誘導）
+- `/select/[card]` — Q1表示（ランダムスラッグ、プレーリーカードからもここに誘導）
 - `/q2?t=<token>` — Q2以降（4文字英数字トークンで分岐管理）
 - `/result?id=<id>` — 結果表示
+- `/admin` — 管理ダッシュボード（認証必須）
 
 ## API エンドポイント
 
@@ -96,6 +97,17 @@ npx wrangler d1 execute prairie-cnk-db --file=schema.sql  # DB初期化
 - フロー: コード変更 → `/simplify` レビュー → 修正 → コミット → diffレビュー → プッシュ
 
 ## 管理ツール
+
+### Web管理画面
+
+- URL: `/admin`（本番: https://cnk-mitatecho.pages.dev/admin）
+- 認証方式（優先順）:
+  1. **Cloudflare Access JWT** — CF Zero Trustで `/admin*`, `/api/admin/*` を保護（推奨）
+  2. **API key** — ADMIN_API_KEYによるBearer認証（CLIおよびフォールバック）
+- 機能: 投稿一覧（カードフィルター付き）・詳細表示・削除
+- CF Access環境変数: `CF_ACCESS_TEAM`（チーム名）, `CF_ACCESS_AUD`（Application Audience Tag）
+
+### CLI
 
 ```bash
 ./admin.sh list [card]     # 投稿一覧（card省略で全件）
