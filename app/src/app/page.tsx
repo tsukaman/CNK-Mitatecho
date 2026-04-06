@@ -39,7 +39,7 @@ function PoemCard({ entry }: { entry: PoemEntry }) {
   const displayName = entry.nickname_public && entry.nickname ? entry.nickname : "詠まれ人知らず";
 
   return (
-    <div className="poem-box relative overflow-hidden rounded-lg p-5 w-72 shrink-0">
+    <div className="poem-box relative overflow-hidden rounded-lg p-5 w-72 h-40 shrink-0 flex flex-col justify-center">
       <div className="text-center" style={{ fontFamily: "var(--font-poem)" }}>
         <p className="text-sm leading-loose tracking-wider text-sumi-800">{kamiNoKu}</p>
         <p className="text-sm leading-loose tracking-wider text-sumi-800">{shimoNoKu}</p>
