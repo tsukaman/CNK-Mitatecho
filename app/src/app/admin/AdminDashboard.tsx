@@ -344,20 +344,19 @@ export default function AdminDashboard() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-sumi-200 bg-sumi-50">
-              <th className="px-3 py-2 text-left text-xs font-bold text-sumi-600">ID</th>
-              <th className="px-3 py-2 text-left text-xs font-bold text-sumi-600">状態</th>
-              <th className="px-3 py-2 text-left text-xs font-bold text-sumi-600">巻</th>
-              <th className="px-3 py-2 text-left text-xs font-bold text-sumi-600">武将</th>
+              <th className="px-3 py-2 text-left text-xs font-bold text-sumi-600 whitespace-nowrap">状態</th>
+              <th className="px-3 py-2 text-left text-xs font-bold text-sumi-600 whitespace-nowrap">巻</th>
+              <th className="px-3 py-2 text-left text-xs font-bold text-sumi-600 whitespace-nowrap">武将</th>
               <th className="px-3 py-2 text-left text-xs font-bold text-sumi-600">投稿者</th>
-              <th className="px-3 py-2 text-left text-xs font-bold text-sumi-600">日時</th>
+              <th className="px-3 py-2 text-left text-xs font-bold text-sumi-600 whitespace-nowrap">日時</th>
               <th className="px-3 py-2 text-left text-xs font-bold text-sumi-600">自由記述</th>
               <th className="px-3 py-2 text-left text-xs font-bold text-sumi-600">短歌</th>
-              <th className="px-3 py-2 text-center text-xs font-bold text-sumi-600">操作</th>
+              <th className="px-3 py-2 text-center text-xs font-bold text-sumi-600 whitespace-nowrap">操作</th>
             </tr>
           </thead>
           <tbody>
             {entries.length === 0 && !loading && (
-              <tr><td colSpan={9} className="px-3 py-8 text-center text-sumi-400">データがありません</td></tr>
+              <tr><td colSpan={8} className="px-3 py-8 text-center text-sumi-400">データがありません</td></tr>
             )}
             {entries.map((entry) => {
               const cardInfo = CARD_LABELS.find((c) => c.id === entry.card_id);
@@ -368,18 +367,17 @@ export default function AdminDashboard() {
                   className={`border-b border-sumi-100 cursor-pointer transition-colors ${hidden ? "opacity-50" : ""} ${selectedEntry?.id === entry.id ? "bg-ai-50" : "hover:bg-sumi-50"}`}
                   onClick={() => setSelectedEntry(entry)}
                 >
-                  <td className="px-3 py-2 font-mono text-xs text-sumi-500">{entry.id.slice(0, 8)}</td>
-                  <td className="px-3 py-2">
+                  <td className="px-3 py-2 whitespace-nowrap">
                     {hidden ? (
                       <span className="text-[10px] bg-red-50 text-red-600 px-1.5 py-0.5 rounded">非表示</span>
                     ) : (
                       <span className="text-[10px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded">公開</span>
                     )}
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="px-3 py-2 whitespace-nowrap">
                     <span className="text-xs font-bold" style={{ color: cardInfo?.color }}>{cardInfo?.label || entry.card_id}</span>
                   </td>
-                  <td className="px-3 py-2 text-xs" style={{ fontFamily: "var(--font-brush)" }}>{getCharacterName(entry.character_id)}</td>
+                  <td className="px-3 py-2 text-xs whitespace-nowrap" style={{ fontFamily: "var(--font-brush)" }}>{getCharacterName(entry.character_id)}</td>
                   <td className="px-3 py-2 text-xs text-sumi-500">{entry.nickname || <span className="text-sumi-300">-</span>}</td>
                   <td className="px-3 py-2 text-xs text-sumi-500 whitespace-nowrap">{formatDate(entry.created_at)}</td>
                   <td className="px-3 py-2 text-xs max-w-[200px]">{truncate(entry.free_text, 30)}</td>
