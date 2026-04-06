@@ -31,7 +31,7 @@ const STAGGER = [
 ];
 
 /** 短歌カード（マーキー内で使い回す） */
-function PoemCard({ entry, onClick }: { entry: PoemEntry; onClick: () => void }) {
+function PoemCard({ entry }: { entry: PoemEntry }) {
   const { kamiNoKu, shimoNoKu } = splitPoem(entry.poem);
   const scenario = SCENARIOS[entry.card_id];
   let charName = "";
@@ -39,10 +39,7 @@ function PoemCard({ entry, onClick }: { entry: PoemEntry; onClick: () => void })
   const displayName = entry.nickname_public && entry.nickname ? entry.nickname : "詠まれ人知らず";
 
   return (
-    <div
-      className="poem-box relative overflow-hidden rounded-lg p-5 w-72 shrink-0 cursor-pointer transition-shadow hover:shadow-lg"
-      onClick={onClick}
-    >
+    <div className="poem-box relative overflow-hidden rounded-lg p-5 w-72 shrink-0">
       <div className="text-center" style={{ fontFamily: "var(--font-poem)" }}>
         <p className="text-sm leading-loose tracking-wider text-sumi-800">{kamiNoKu}</p>
         <p className="text-sm leading-loose tracking-wider text-sumi-800">{shimoNoKu}</p>
@@ -56,65 +53,9 @@ function PoemCard({ entry, onClick }: { entry: PoemEntry; onClick: () => void })
   );
 }
 
-/** 短歌詳細モーダル */
-function PoemDetailModal({ entry, onClose }: { entry: PoemEntry; onClose: () => void }) {
-  const { kamiNoKu, shimoNoKu } = splitPoem(entry.poem);
-  const scenario = SCENARIOS[entry.card_id];
-  let char = null;
-  try { char = getCharacter(entry.character_id); } catch { /* skip */ }
-  const displayName = entry.nickname_public && entry.nickname ? entry.nickname : "詠まれ人知らず";
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={onClose}>
-      <div
-        className="w-full max-w-md max-h-[85vh] overflow-y-auto rounded-lg bg-washi-100 shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* 短歌ヘッダー */}
-        <div className="relative p-6 pb-4" style={{ borderBottom: `2px solid ${scenario?.colorCode || '#ccc'}` }}>
-          <button onClick={onClose} className="absolute top-3 right-3 text-sumi-400 hover:text-sumi-600 text-lg leading-none">&times;</button>
-          <div className="text-center" style={{ fontFamily: "var(--font-poem)" }}>
-            <p className="text-base leading-loose tracking-wider text-sumi-800">{kamiNoKu}</p>
-            <p className="text-base leading-loose tracking-wider text-sumi-800">{shimoNoKu}</p>
-          </div>
-          <div className="mt-3 flex items-center justify-center gap-2 text-xs text-sumi-400">
-            {scenario && <span style={{ color: scenario.colorCode }}>●</span>}
-            <span>{scenario?.name}の巻</span>
-            <span>── {displayName}</span>
-          </div>
-        </div>
-
-        {/* 武将情報 */}
-        {char && (
-          <div className="p-6">
-            <div className="text-center mb-4">
-              <p className="text-2xl font-bold" style={{ fontFamily: "var(--font-brush)", color: scenario?.colorCode }}>
-                {char.name}
-              </p>
-              <p className="text-xs text-sumi-500 mt-1" style={{ fontFamily: "var(--font-zen)" }}>
-                {char.title}
-              </p>
-            </div>
-
-            <div className="text-sm text-sumi-700 leading-relaxed whitespace-pre-wrap mb-4">
-              {char.description}
-            </div>
-
-            <div className="rounded-lg bg-sumi-50 p-4">
-              <p className="text-xs font-bold text-sumi-500 mb-2" style={{ fontFamily: "var(--font-zen)" }}>史実</p>
-              <p className="text-xs text-sumi-600 leading-relaxed">{char.history}</p>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
 /** 千人一首ギャラリー（4段マーキースクロール） */
 function PoemGallery() {
   const [poems, setPoems] = useState<PoemEntry[]>([]);
-  const [selectedPoem, setSelectedPoem] = useState<PoemEntry | null>(null);
 
   useEffect(() => {
     api.getPoems(30).then((data) => setPoems(data.entries)).catch((err) => console.error('Failed to load poems:', err));
@@ -148,14 +89,12 @@ function PoemGallery() {
               className={`${directions[ri]} gap-4`}
               style={{ "--marquee-duration": durations[ri] } as React.CSSProperties}
             >
-              {row.map((entry, i) => <PoemCard key={`${ri}a-${i}`} entry={entry} onClick={() => setSelectedPoem(entry)} />)}
-              {row.map((entry, i) => <PoemCard key={`${ri}b-${i}`} entry={entry} onClick={() => setSelectedPoem(entry)} />)}
+              {row.map((entry, i) => <PoemCard key={`${ri}a-${i}`} entry={entry} />)}
+              {row.map((entry, i) => <PoemCard key={`${ri}b-${i}`} entry={entry} />)}
             </div>
           </div>
         ))}
       </div>
-
-      {selectedPoem && <PoemDetailModal entry={selectedPoem} onClose={() => setSelectedPoem(null)} />}
     </div>
   );
 }
