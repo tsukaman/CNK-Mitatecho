@@ -176,12 +176,22 @@ function PrairieCardLanding() {
       <PoemGallery />
 
       {/* イベント情報 */}
-      <div className="mx-auto max-w-lg px-4 pb-10">
+      <div className="mx-auto max-w-lg px-4 pb-6">
         <div className="rounded-lg border-2 border-beni-200 bg-white/90 backdrop-blur-sm p-8 text-center shadow-sm">
           <p className="text-sm font-bold text-beni-800 leading-relaxed" style={{ fontFamily: "var(--font-zen)" }}>
             風雲戦国見立帖は、実行委員ブースにある<br className="hidden sm:inline" />
             プレーリーカードを読み取ることで体験することができます。
           </p>
+        </div>
+      </div>
+
+      {/* 協賛 */}
+      <div className="mx-auto max-w-lg px-4 pb-10">
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-xs text-sumi-400 tracking-widest">協賛</p>
+          <a href="https://prairie.cards/" target="_blank" rel="noopener noreferrer" className="transition-opacity hover:opacity-70">
+            <Image src="/prairie-card-logo.png" alt="Prairie Card（プレーリーカード）" width={160} height={80} className="object-contain" />
+          </a>
         </div>
       </div>
     </>
