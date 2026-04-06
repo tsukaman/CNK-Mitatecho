@@ -30,58 +30,132 @@ const STAGGER = [
   "animate-fade-in-d6",
 ];
 
-/** 千人一首ギャラリー */
+/** 短歌カード（マーキー内で使い回す） */
+function PoemCard({ entry, onClick }: { entry: PoemEntry; onClick: () => void }) {
+  const { kamiNoKu, shimoNoKu } = splitPoem(entry.poem);
+  const scenario = SCENARIOS[entry.card_id];
+  let charName = "";
+  try { charName = getCharacter(entry.character_id).name; } catch { /* skip */ }
+  const displayName = entry.nickname_public && entry.nickname ? entry.nickname : "詠まれ人知らず";
+
+  return (
+    <div
+      className="poem-box relative overflow-hidden rounded-lg p-5 w-72 shrink-0 cursor-pointer transition-shadow hover:shadow-lg"
+      onClick={onClick}
+    >
+      <div className="text-center" style={{ fontFamily: "var(--font-poem)" }}>
+        <p className="text-sm leading-loose tracking-wider text-sumi-800">{kamiNoKu}</p>
+        <p className="text-sm leading-loose tracking-wider text-sumi-800">{shimoNoKu}</p>
+      </div>
+      <div className="mt-3 flex items-center justify-center gap-2 text-xs text-sumi-400">
+        {scenario && <span style={{ color: scenario.colorCode }}>●</span>}
+        <span style={{ fontFamily: "var(--font-brush)" }}>{charName}</span>
+        <span>── {displayName}</span>
+      </div>
+    </div>
+  );
+}
+
+/** 短歌詳細モーダル */
+function PoemDetailModal({ entry, onClose }: { entry: PoemEntry; onClose: () => void }) {
+  const { kamiNoKu, shimoNoKu } = splitPoem(entry.poem);
+  const scenario = SCENARIOS[entry.card_id];
+  let char = null;
+  try { char = getCharacter(entry.character_id); } catch { /* skip */ }
+  const displayName = entry.nickname_public && entry.nickname ? entry.nickname : "詠まれ人知らず";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={onClose}>
+      <div
+        className="w-full max-w-md max-h-[85vh] overflow-y-auto rounded-lg bg-washi-100 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* 短歌ヘッダー */}
+        <div className="relative p-6 pb-4" style={{ borderBottom: `2px solid ${scenario?.colorCode || '#ccc'}` }}>
+          <button onClick={onClose} className="absolute top-3 right-3 text-sumi-400 hover:text-sumi-600 text-lg leading-none">&times;</button>
+          <div className="text-center" style={{ fontFamily: "var(--font-poem)" }}>
+            <p className="text-base leading-loose tracking-wider text-sumi-800">{kamiNoKu}</p>
+            <p className="text-base leading-loose tracking-wider text-sumi-800">{shimoNoKu}</p>
+          </div>
+          <div className="mt-3 flex items-center justify-center gap-2 text-xs text-sumi-400">
+            {scenario && <span style={{ color: scenario.colorCode }}>●</span>}
+            <span>{scenario?.name}の巻</span>
+            <span>── {displayName}</span>
+          </div>
+        </div>
+
+        {/* 武将情報 */}
+        {char && (
+          <div className="p-6">
+            <div className="text-center mb-4">
+              <p className="text-2xl font-bold" style={{ fontFamily: "var(--font-brush)", color: scenario?.colorCode }}>
+                {char.name}
+              </p>
+              <p className="text-xs text-sumi-500 mt-1" style={{ fontFamily: "var(--font-zen)" }}>
+                {char.title}
+              </p>
+            </div>
+
+            <div className="text-sm text-sumi-700 leading-relaxed whitespace-pre-wrap mb-4">
+              {char.description}
+            </div>
+
+            <div className="rounded-lg bg-sumi-50 p-4">
+              <p className="text-xs font-bold text-sumi-500 mb-2" style={{ fontFamily: "var(--font-zen)" }}>史実</p>
+              <p className="text-xs text-sumi-600 leading-relaxed">{char.history}</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** 千人一首ギャラリー（4段マーキースクロール） */
 function PoemGallery() {
   const [poems, setPoems] = useState<PoemEntry[]>([]);
+  const [selectedPoem, setSelectedPoem] = useState<PoemEntry | null>(null);
 
   useEffect(() => {
-    api.getPoems(12).then((data) => setPoems(data.entries)).catch((err) => console.error('Failed to load poems:', err));
+    api.getPoems(30).then((data) => setPoems(data.entries)).catch((err) => console.error('Failed to load poems:', err));
   }, []);
 
   if (poems.length === 0) return null;
 
+  // 短歌を4段に分配
+  const rows: PoemEntry[][] = [[], [], [], []];
+  poems.forEach((p, i) => rows[i % 4].push(p));
+
+  const durations = ["50s", "65s", "55s", "70s"];
+  const directions = ["marquee-track", "marquee-track-reverse", "marquee-track", "marquee-track-reverse"];
+
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="h-px flex-1 bg-sumi-200" />
-        <p className="text-sm font-bold text-sumi-500 tracking-widest shrink-0" style={{ fontFamily: "var(--font-zen)" }}>
-          千人一首 ── これまでに詠まれた歌
-        </p>
-        <div className="h-px flex-1 bg-sumi-200" />
+    <div className="py-10">
+      <div className="mx-auto max-w-lg px-4 mb-6">
+        <div className="flex items-center gap-3">
+          <div className="h-px flex-1 bg-sumi-200" />
+          <p className="text-base font-bold text-sumi-600 tracking-widest shrink-0" style={{ fontFamily: "var(--font-zen)" }}>
+            千人一首 ── これまでに詠まれた歌
+          </p>
+          <div className="h-px flex-1 bg-sumi-200" />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {poems.map((entry, i) => {
-          const { kamiNoKu, shimoNoKu } = splitPoem(entry.poem);
-          const scenario = SCENARIOS[entry.card_id];
-          let charName = "";
-          try { charName = getCharacter(entry.character_id).name; } catch { /* skip */ }
-          const displayName = entry.nickname_public && entry.nickname ? entry.nickname : null;
-
-          return (
+      <div className="flex flex-col gap-4">
+        {rows.map((row, ri) => (
+          <div key={ri} className="overflow-hidden">
             <div
-              key={i}
-              className="poem-box relative overflow-hidden rounded-lg p-5 animate-fade-in"
+              className={`${directions[ri]} gap-4`}
+              style={{ "--marquee-duration": durations[ri] } as React.CSSProperties}
             >
-              <div className="text-center" style={{ fontFamily: "var(--font-poem)" }}>
-                <p className="text-base leading-loose tracking-wider text-sumi-800">
-                  {kamiNoKu}
-                </p>
-                <p className="text-base leading-loose tracking-wider text-sumi-800">
-                  {shimoNoKu}
-                </p>
-              </div>
-              <div className="mt-3 flex items-center justify-center gap-2 text-xs text-sumi-400">
-                {scenario && (
-                  <span style={{ color: scenario.colorCode }}>●</span>
-                )}
-                <span style={{ fontFamily: "var(--font-brush)" }}>{charName}</span>
-                {displayName && <span>── {displayName}</span>}
-              </div>
+              {row.map((entry, i) => <PoemCard key={`${ri}a-${i}`} entry={entry} onClick={() => setSelectedPoem(entry)} />)}
+              {row.map((entry, i) => <PoemCard key={`${ri}b-${i}`} entry={entry} onClick={() => setSelectedPoem(entry)} />)}
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
+
+      {selectedPoem && <PoemDetailModal entry={selectedPoem} onClose={() => setSelectedPoem(null)} />}
     </div>
   );
 }
@@ -138,7 +212,7 @@ function PrairieCardLanding() {
       <div className="mx-auto max-w-lg px-4 py-10">
         <div className="flex items-center gap-3 mb-6">
           <div className="h-px flex-1 bg-sumi-200" />
-          <p className="text-sm font-bold text-sumi-500 tracking-widest shrink-0" style={{ fontFamily: "var(--font-zen)" }}>
+          <p className="text-base font-bold text-sumi-600 tracking-widest shrink-0" style={{ fontFamily: "var(--font-zen)" }}>
             体験の流れ
           </p>
           <div className="h-px flex-1 bg-sumi-200" />
@@ -146,13 +220,13 @@ function PrairieCardLanding() {
 
         <div className="flex flex-col gap-3">
           {[
-            { step: "壱", text: "プレーリーカードをかざして巻を選ぶ" },
-            { step: "弐", text: "戦国の世界観に沿った三つの問いに答える" },
-            { step: "参", text: "あなたに見立てられた戦国武将が明かされる" },
-            { step: "肆", text: "AIがあなただけの短歌を詠む" },
-          ].map(({ step, text }, i) => (
+            { step: "壱", text: "プレーリーカードをかざして巻を選ぶ", color: "#548a8a" },
+            { step: "弐", text: "戦国の世界観に沿った三つの問いに答える", color: "#4a7fb5" },
+            { step: "参", text: "あなたに見立てられた戦国武将が明かされる", color: "#8b5cad" },
+            { step: "肆", text: "AIがあなただけの短歌を詠む", color: "#b8963e" },
+          ].map(({ step, text, color }) => (
             <div key={step} className="flex items-center gap-4 rounded-lg bg-white/60 backdrop-blur-sm p-4 border border-sumi-100">
-              <span className="w-8 h-8 flex items-center justify-center rounded-full bg-sumi-800 text-washi-100 text-sm shrink-0" style={{ fontFamily: "var(--font-brush)" }}>{step}</span>
+              <span className="w-8 h-8 flex items-center justify-center rounded-full text-white text-sm shrink-0" style={{ fontFamily: "var(--font-brush)", backgroundColor: color }}>{step}</span>
               <p className="text-sm text-sumi-700 leading-relaxed">{text}</p>
             </div>
           ))}
@@ -164,14 +238,10 @@ function PrairieCardLanding() {
 
       {/* イベント情報 */}
       <div className="mx-auto max-w-lg px-4 pb-10">
-        <div className="rounded-lg border border-sumi-200 bg-washi-200/80 backdrop-blur-sm p-6 text-center">
-          <p className="text-sm text-sumi-600 leading-relaxed">
+        <div className="rounded-lg border-2 border-beni-200 bg-white/90 backdrop-blur-sm p-8 text-center shadow-sm">
+          <p className="text-sm font-bold text-beni-800 leading-relaxed" style={{ fontFamily: "var(--font-zen)" }}>
             風雲戦国見立帖は、実行委員ブースにある<br className="hidden sm:inline" />
             プレーリーカードを読み取ることで体験することができます。
-          </p>
-          <p className="mt-3 text-xs text-sumi-400">
-            クラウドネイティブ会議<br />
-            2026年5月14-15日 @ 名古屋
           </p>
         </div>
       </div>
