@@ -2,7 +2,7 @@ import { successResponse, errorResponse } from '../../../utils/response.js';
 
 // 認証は _middleware.js で一元処理
 
-export async function onRequestDelete(context) {
+export async function onRequestPost(context) {
   const { env, params } = context;
 
   try {
@@ -11,28 +11,24 @@ export async function onRequestDelete(context) {
       return errorResponse('Invalid id', 400);
     }
 
-    // レコード存在確認
+    // 現在の状態を取得
     const existing = await env.DB.prepare(
-      'SELECT id, free_text, nickname, is_hidden FROM answers WHERE id = ?'
+      'SELECT id, is_hidden FROM answers WHERE id = ?'
     ).bind(id).first();
 
     if (!existing) {
       return errorResponse('Record not found', 404);
     }
 
-    // 非表示エントリのみ削除可能
-    if (!existing.is_hidden) {
-      return errorResponse('削除するには先に非表示にしてください', 409);
-    }
-
-    // 削除実行
+    // トグル
+    const newValue = existing.is_hidden ? 0 : 1;
     await env.DB.prepare(
-      'DELETE FROM answers WHERE id = ?'
-    ).bind(id).run();
+      'UPDATE answers SET is_hidden = ? WHERE id = ?'
+    ).bind(newValue, id).run();
 
-    return successResponse({ deleted: id });
+    return successResponse({ id, is_hidden: newValue });
   } catch (err) {
-    console.error('Admin delete error:', err);
+    console.error('Toggle visibility error:', err);
     return errorResponse('Internal server error', 500);
   }
 }

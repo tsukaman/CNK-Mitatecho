@@ -19,7 +19,7 @@ export async function onRequestGet(context) {
     const result = await env.DB.prepare(
       `SELECT poem, character_id, card_id, nickname, nickname_public, created_at
        FROM answers
-       WHERE poem IS NOT NULL AND poem != ''
+       WHERE poem IS NOT NULL AND poem != '' AND is_hidden = 0
        ORDER BY created_at DESC
        LIMIT ?`
     ).bind(limit).all();

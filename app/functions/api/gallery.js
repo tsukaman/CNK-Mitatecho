@@ -18,7 +18,7 @@ export async function onRequestGet(context) {
 
     // Count total entries for this card
     const countResult = await env.DB.prepare(
-      `SELECT COUNT(*) as total FROM answers WHERE card_id = ?`
+      `SELECT COUNT(*) as total FROM answers WHERE card_id = ? AND is_hidden = 0`
     ).bind(card).first();
 
     const total = countResult?.total || 0;
@@ -27,7 +27,7 @@ export async function onRequestGet(context) {
     if (total <= 8) {
       const all = await env.DB.prepare(
         `SELECT free_text, character_id, nickname, nickname_public, created_at
-         FROM answers WHERE card_id = ?
+         FROM answers WHERE card_id = ? AND is_hidden = 0
          ORDER BY created_at DESC`
       ).bind(card).all();
       return successResponse({ entries: all.results });
@@ -36,7 +36,7 @@ export async function onRequestGet(context) {
     // Latest 3
     const latest = await env.DB.prepare(
       `SELECT id, free_text, character_id, nickname, nickname_public, created_at
-       FROM answers WHERE card_id = ?
+       FROM answers WHERE card_id = ? AND is_hidden = 0
        ORDER BY created_at DESC LIMIT 3`
     ).bind(card).all();
 
@@ -46,7 +46,7 @@ export async function onRequestGet(context) {
     const placeholders = latestIds.map(() => '?').join(',');
     const random = await env.DB.prepare(
       `SELECT free_text, character_id, nickname, nickname_public, created_at
-       FROM answers WHERE card_id = ? AND id NOT IN (${placeholders})
+       FROM answers WHERE card_id = ? AND is_hidden = 0 AND id NOT IN (${placeholders})
        ORDER BY RANDOM() LIMIT 5`
     ).bind(card, ...latestIds).all();
 

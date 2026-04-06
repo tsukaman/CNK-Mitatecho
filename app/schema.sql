@@ -8,8 +8,10 @@ CREATE TABLE IF NOT EXISTS answers (
   poem TEXT,
   nickname TEXT,
   nickname_public INTEGER NOT NULL DEFAULT 0,
+  is_hidden INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_answers_card ON answers(card_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_answers_character ON answers(character_id);
+CREATE INDEX IF NOT EXISTS idx_answers_hidden ON answers(is_hidden, card_id, created_at DESC);
