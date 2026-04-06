@@ -150,9 +150,9 @@ function PrairieCardLanding() {
             { step: "弐", text: "戦国の世界観に沿った三つの問いに答える" },
             { step: "参", text: "あなたに見立てられた戦国武将が明かされる" },
             { step: "肆", text: "AIがあなただけの短歌を詠む" },
-          ].map(({ step, text }) => (
-            <div key={step} className="flex items-start gap-3 rounded-lg bg-white p-4 border border-sumi-100">
-              <span className="text-lg font-black text-beni-600 shrink-0" style={{ fontFamily: "var(--font-brush)" }}>{step}</span>
+          ].map(({ step, text }, i) => (
+            <div key={step} className="flex items-center gap-4 rounded-lg bg-white/60 backdrop-blur-sm p-4 border border-sumi-100">
+              <span className="w-8 h-8 flex items-center justify-center rounded-full bg-sumi-800 text-washi-100 text-sm shrink-0" style={{ fontFamily: "var(--font-brush)" }}>{step}</span>
               <p className="text-sm text-sumi-700 leading-relaxed">{text}</p>
             </div>
           ))}
