@@ -186,7 +186,7 @@ function PrairieCardLanding() {
       </div>
 
       {/* 協賛 */}
-      <div className="mx-auto max-w-lg px-4 pb-10">
+      <div className="mx-auto max-w-lg px-4 pt-6 pb-10">
         <div className="flex flex-col items-center gap-2">
           <p className="text-xs text-sumi-400 tracking-widest">協賛</p>
           <a href="https://prairie.cards/" target="_blank" rel="noopener noreferrer" className="transition-opacity hover:opacity-70">
