@@ -41,7 +41,7 @@ function PoemGallery() {
   if (poems.length === 0) return null;
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-10">
+    <div className="mx-auto max-w-3xl px-4 py-10">
       <div className="flex items-center gap-3 mb-6">
         <div className="h-px flex-1 bg-sumi-200" />
         <p className="text-sm font-bold text-sumi-500 tracking-widest shrink-0" style={{ fontFamily: "var(--font-zen)" }}>
@@ -50,7 +50,7 @@ function PoemGallery() {
         <div className="h-px flex-1 bg-sumi-200" />
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {poems.map((entry, i) => {
           const { kamiNoKu, shimoNoKu } = splitPoem(entry.poem);
           const scenario = SCENARIOS[entry.card_id];
