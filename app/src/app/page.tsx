@@ -68,6 +68,7 @@ function PoemGallery() {
   poems.forEach((p, i) => rows[i % 4].push(p));
 
   const durations = ["50s", "65s", "55s", "70s"];
+  const delays = ["-25s", "-32s", "-14s", "-45s"];
   const directions = ["marquee-track", "marquee-track-reverse", "marquee-track", "marquee-track-reverse"];
 
   return (
@@ -87,7 +88,7 @@ function PoemGallery() {
           <div key={ri} className="overflow-hidden">
             <div
               className={`${directions[ri]} gap-4`}
-              style={{ "--marquee-duration": durations[ri] } as React.CSSProperties}
+              style={{ "--marquee-duration": durations[ri], animationDelay: delays[ri] } as React.CSSProperties}
             >
               {row.map((entry, i) => <PoemCard key={`${ri}a-${i}`} entry={entry} />)}
               {row.map((entry, i) => <PoemCard key={`${ri}b-${i}`} entry={entry} />)}
