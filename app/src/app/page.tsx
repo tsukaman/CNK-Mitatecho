@@ -92,6 +92,7 @@ function PoemGallery() {
             >
               {row.map((entry, i) => <PoemCard key={`${ri}a-${i}`} entry={entry} />)}
               {row.map((entry, i) => <PoemCard key={`${ri}b-${i}`} entry={entry} />)}
+              {row.map((entry, i) => <PoemCard key={`${ri}c-${i}`} entry={entry} />)}
             </div>
           </div>
         ))}
