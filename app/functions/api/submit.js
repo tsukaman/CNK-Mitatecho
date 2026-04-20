@@ -12,6 +12,24 @@ export async function onRequestPost(context) {
   const { request, env } = context;
 
   try {
+    // Rate limit: 10 req / 60s / IP
+    // バインディングは Cloudflare Pages Dashboard で SUBMIT_RATE_LIMITER として設定
+    // dev/preview でバインディング未設定時はスキップ（fail-open）
+    // IP 取得不可 or limiter 例外時も通過させる（可用性優先）
+    if (env.SUBMIT_RATE_LIMITER) {
+      const ip = request.headers.get('CF-Connecting-IP');
+      if (ip) {
+        try {
+          const { success } = await env.SUBMIT_RATE_LIMITER.limit({ key: `submit:${ip}` });
+          if (!success) {
+            return errorResponse('投稿が集中しています。少し時間を置いて再度お試しください。', 429);
+          }
+        } catch (err) {
+          console.warn('Rate limiter error (fail-open):', err.message);
+        }
+      }
+    }
+
     const body = await request.json();
     const { card, q1, q2, free_text, nickname, nickname_public, q1_choice_text, q2_choice_text, q2_choice_type, sct_template } = body;
 
