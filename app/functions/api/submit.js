@@ -67,7 +67,13 @@ export async function onRequestPost(context) {
       sanitizedNickname = sanitizeText(trimmed);
     }
 
-    const nicknamePublicFlag = nickname_public ? 1 : 0;
+    // 公開扱い: true / 1 / "true" / "1" のみ（"false" などの文字列 truthy 誤判定を回避）
+    const nicknamePublicFlag = (
+      nickname_public === true ||
+      nickname_public === 1 ||
+      nickname_public === 'true' ||
+      nickname_public === '1'
+    ) ? 1 : 0;
 
     // Determine character
     const character_id = getCharacterId(card, q1, q2);

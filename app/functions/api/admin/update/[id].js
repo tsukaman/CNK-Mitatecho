@@ -42,7 +42,13 @@ export async function onRequestPatch(context) {
     }
 
     if (body.nickname_public !== undefined) {
-      const pub = body.nickname_public ? 1 : 0;
+      // 公開扱い: true / 1 / "true" / "1" のみ
+      const pub = (
+        body.nickname_public === true ||
+        body.nickname_public === 1 ||
+        body.nickname_public === 'true' ||
+        body.nickname_public === '1'
+      ) ? 1 : 0;
       updates.push('nickname_public = ?');
       binds.push(pub);
     }

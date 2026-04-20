@@ -70,6 +70,23 @@ export async function onRequest(context) {
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('X-Frame-Options', 'SAMEORIGIN');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
+  response.headers.set('Content-Security-Policy', [
+    "default-src 'self'",
+    "img-src 'self' data: blob:",
+    // Next.js が inline style を挿入するため unsafe-inline が必要
+    // Google Fonts CSS も許可
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    // Google Fonts のフォントファイルは fonts.gstatic.com から配信
+    "font-src 'self' data: https://fonts.gstatic.com",
+    // Next.js 15 の static export では eval 不要。inline script は残る
+    "script-src 'self' 'unsafe-inline'",
+    "connect-src 'self'",
+    "frame-ancestors 'self'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join('; '));
 
   return response;
 }

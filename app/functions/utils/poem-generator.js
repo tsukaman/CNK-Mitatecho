@@ -156,7 +156,7 @@ anyを断ち
           await sleep(RETRY_DELAY_MS * attempt);
           continue;
         }
-        // 最終試行でバリデーション失敗でも、出力自体はあるので保存する
+        break; // 最終試行でバリデーション失敗なら保存しない（散文・注釈混入を防ぐ）
       }
 
       // Save to D1

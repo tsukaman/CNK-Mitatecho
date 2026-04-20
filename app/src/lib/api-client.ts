@@ -7,9 +7,17 @@ const API_BASE =
 
 async function fetchJSON<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(url, options);
-  const json = await res.json();
-  if (!res.ok || !json.success) {
-    throw new Error(json.error || `API error: ${res.status}`);
+  // 非JSON（HTMLエラーページ等）でも SyntaxError で原因を隠さないよう防御的に処理
+  let json: { success?: boolean; data?: unknown; error?: string } | null = null;
+  try {
+    json = await res.json();
+  } catch {
+    // 204 No Content や空ボディ 2xx は undefined として許容（誤検知回避）
+    if (res.ok) return undefined as T;
+    throw new Error(res.status === 429 ? 'リクエストが多すぎます。少し時間をおいて再試行してください。' : `通信エラー (HTTP ${res.status})`);
+  }
+  if (!res.ok || !json || !json.success) {
+    throw new Error(json?.error || `API error: ${res.status}`);
   }
   return json.data as T;
 }
