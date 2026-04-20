@@ -12,21 +12,28 @@ export async function onRequestPost(context) {
   const { request, env } = context;
 
   try {
-    // Rate limit: 10 req / 60s / IP
-    // バインディングは Cloudflare Pages Dashboard で SUBMIT_RATE_LIMITER として設定
-    // dev/preview でバインディング未設定時はスキップ（fail-open）
-    // IP 取得不可 or limiter 例外時も通過させる（可用性優先）
-    if (env.SUBMIT_RATE_LIMITER) {
-      const ip = request.headers.get('CF-Connecting-IP');
-      if (ip) {
-        try {
-          const { success } = await env.SUBMIT_RATE_LIMITER.limit({ key: `submit:${ip}` });
-          if (!success) {
-            return errorResponse('投稿が集中しています。少し時間を置いて再度お試しください。', 429);
-          }
-        } catch (err) {
-          console.warn('Rate limiter error (fail-open):', err.message);
+    // Rate limit: 10 req / 60s / IP （D1 の rate_limits テーブルを UPSERT でカウント）
+    // IP 取得不可時は制限せず通過（NAT/特殊経路での誤集約を回避、fail-open）
+    // D1 例外時も通過（可用性優先）
+    const ip = request.headers.get('CF-Connecting-IP');
+    if (ip && env.DB) {
+      try {
+        const now = Math.floor(Date.now() / 1000);
+        const windowSec = 60;
+        const maxCount = 10;
+        const result = await env.DB.prepare(
+          `INSERT INTO rate_limits (key, count, window_start)
+           VALUES (?1, 1, ?2)
+           ON CONFLICT(key) DO UPDATE SET
+             count = CASE WHEN rate_limits.window_start + ?3 <= ?2 THEN 1 ELSE rate_limits.count + 1 END,
+             window_start = CASE WHEN rate_limits.window_start + ?3 <= ?2 THEN ?2 ELSE rate_limits.window_start END
+           RETURNING count`
+        ).bind(`submit:${ip}`, now, windowSec).first();
+        if (result && result.count > maxCount) {
+          return errorResponse('投稿が集中しています。少し時間を置いて再度お試しください。', 429);
         }
+      } catch (err) {
+        console.warn('Rate limit D1 error (fail-open):', err.message);
       }
     }
 

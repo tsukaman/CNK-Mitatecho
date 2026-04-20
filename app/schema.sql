@@ -15,3 +15,13 @@ CREATE TABLE IF NOT EXISTS answers (
 CREATE INDEX IF NOT EXISTS idx_answers_card ON answers(card_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_answers_character ON answers(character_id);
 CREATE INDEX IF NOT EXISTS idx_answers_hidden ON answers(is_hidden, card_id, created_at DESC);
+
+-- /api/submit のレート制限用（10 req/60s/IP）
+-- key: "submit:<ip>" 形式。window_start は unix 秒、count はその window 内のリクエスト数。
+-- 同一 key の UPSERT で窓期限切れなら reset、そうでなければインクリメント。
+CREATE TABLE IF NOT EXISTS rate_limits (
+  key TEXT PRIMARY KEY,
+  count INTEGER NOT NULL,
+  window_start INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_rate_limits_window ON rate_limits(window_start);

@@ -11,9 +11,5 @@ binding = "DB"
 database_name = "prairie-cnk-db"
 database_id = "dc61e8a3-e575-4abb-93d5-e0eca85ae039"
 
-# NOTE: Rate Limiting binding (SUBMIT_RATE_LIMITER) は Pages では
-# wrangler.toml で定義できないため、Cloudflare Dashboard から設定する。
-# Pages → cnk-mitatecho → Settings → Functions → Bindings → Add Rate Limiter
-#   Variable name: SUBMIT_RATE_LIMITER
-#   Namespace ID: 1001
-#   Limit: 10 requests / 60 seconds
+# NOTE: /api/submit のレート制限は D1 の rate_limits テーブルで実装
+# （Pages Functions は Rate Limiting binding に未対応のため）
