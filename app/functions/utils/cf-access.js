@@ -4,16 +4,17 @@
  */
 
 // Cache for public keys (in-memory, per Worker instance)
-let cachedCerts = null;
-let cachedCertsExpiry = 0;
+// teamName をキーにしてマルチテナント運用時の混線を防ぐ
+const publicKeyCache = new Map();
 
 /**
  * Fetch Cloudflare Access public keys.
  */
 async function getPublicKeys(teamName) {
   const now = Date.now();
-  if (cachedCerts && now < cachedCertsExpiry) {
-    return cachedCerts;
+  const cached = publicKeyCache.get(teamName);
+  if (cached && now < cached.expiry) {
+    return cached.keys;
   }
 
   const certsUrl = `https://${teamName}.cloudflareaccess.com/cdn-cgi/access/certs`;
@@ -23,8 +24,7 @@ async function getPublicKeys(teamName) {
   }
 
   const { keys } = await response.json();
-  cachedCerts = keys;
-  cachedCertsExpiry = now + 5 * 60 * 1000; // 5 min cache
+  publicKeyCache.set(teamName, { keys, expiry: now + 5 * 60 * 1000 }); // 5 min cache
   return keys;
 }
 

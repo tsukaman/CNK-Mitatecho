@@ -72,8 +72,8 @@ export async function callOpenAIWithProxy({ apiKey, body, env }) {
       headers: {
         'Authorization': `Bearer ${env.OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://prairie-cnk.pages.dev',
-        'X-Title': 'Cloud Native Oracle',
+        'HTTP-Referer': 'https://cnk-mitatecho.pages.dev',
+        'X-Title': '風雲戦国見立帖 〜千人一首〜',
       },
       body: JSON.stringify(openRouterBody),
     });
