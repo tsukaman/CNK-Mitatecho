@@ -42,6 +42,7 @@ CNK-Mitatecho/
 
 ```bash
 # app/ ディレクトリで実行
+npm ci               # 依存インストール（lockfile厳守、再現性重視。依存追加時のみ npm install）
 npm run dev          # 開発サーバー (Turbopack)
 npm run build        # 本番ビルド (static export → out/)
 npm run type-check   # TypeScript型チェック
