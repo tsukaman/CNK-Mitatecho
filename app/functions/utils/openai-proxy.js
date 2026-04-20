@@ -28,6 +28,9 @@ export async function callOpenAIWithProxy({ apiKey, body, env }) {
   }
 
   // Method 1: Direct OpenAI API (preferred)
+  // OpenRouter へのフォールバックは 403 (香港等からのリージョンブロック) と
+  // ネットワークエラーに限定する。400/401/500 等で自由回答文を別ベンダに
+  // 流さないための情報境界の制限。
   if (apiKey) {
     try {
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -43,10 +46,17 @@ export async function callOpenAIWithProxy({ apiKey, body, env }) {
         return response;
       }
 
-      // 403 = region block (HKG routing), fall through to OpenRouter
-      console.warn(`OpenAI direct failed (${response.status}), trying OpenRouter fallback`);
+      if (response.status === 403) {
+        console.warn('OpenAI 403 (region block), trying OpenRouter fallback');
+        // fall through to OpenRouter
+      } else {
+        // その他の HTTP エラーはそのまま返す（OpenRouter に転送しない）
+        console.warn(`OpenAI direct failed with ${response.status}, returning as-is`);
+        return response;
+      }
     } catch (err) {
-      console.warn('OpenAI direct error, trying OpenRouter fallback:', err.message);
+      console.warn('OpenAI network error, trying OpenRouter fallback:', err.message);
+      // fall through to OpenRouter
     }
   }
 
