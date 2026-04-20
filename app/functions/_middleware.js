@@ -40,7 +40,7 @@ export async function onRequest(context) {
     if (id && env.DB) {
       try {
         const row = await env.DB.prepare(
-          'SELECT character_id FROM answers WHERE id = ?'
+          'SELECT character_id FROM answers WHERE id = ? AND is_hidden = 0'
         ).bind(id).first();
 
         if (row) {

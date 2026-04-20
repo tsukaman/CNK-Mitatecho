@@ -14,10 +14,14 @@ export async function onRequestGet(context) {
 
   try {
     const url = new URL(request.url);
-    const limit = Math.min(parseInt(url.searchParams.get('limit'), 10) || 12, 30);
+    const parsed = parseInt(url.searchParams.get('limit'), 10);
+    // 負値や NaN を弾き、1〜30 の範囲に収める
+    const limit = Math.max(1, Math.min(Number.isFinite(parsed) ? parsed : 12, 30));
 
     const result = await env.DB.prepare(
-      `SELECT poem, character_id, card_id, nickname, nickname_public, created_at
+      `SELECT poem, character_id, card_id,
+              CASE WHEN nickname_public = 1 THEN nickname ELSE NULL END AS nickname,
+              nickname_public, created_at
        FROM answers
        WHERE poem IS NOT NULL AND poem != '' AND is_hidden = 0
        ORDER BY created_at DESC

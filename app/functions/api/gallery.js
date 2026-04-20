@@ -23,10 +23,13 @@ export async function onRequestGet(context) {
 
     const total = countResult?.total || 0;
 
+    // nickname は nickname_public=1 の場合のみ返す（サーバ側で強制フィルタ）
+    const nicknameExpr = 'CASE WHEN nickname_public = 1 THEN nickname ELSE NULL END AS nickname';
+
     // If 8 or fewer, return all
     if (total <= 8) {
       const all = await env.DB.prepare(
-        `SELECT free_text, character_id, nickname, nickname_public, created_at
+        `SELECT free_text, character_id, ${nicknameExpr}, nickname_public, created_at
          FROM answers WHERE card_id = ? AND is_hidden = 0
          ORDER BY created_at DESC`
       ).bind(card).all();
@@ -35,7 +38,7 @@ export async function onRequestGet(context) {
 
     // Latest 3
     const latest = await env.DB.prepare(
-      `SELECT id, free_text, character_id, nickname, nickname_public, created_at
+      `SELECT id, free_text, character_id, ${nicknameExpr}, nickname_public, created_at
        FROM answers WHERE card_id = ? AND is_hidden = 0
        ORDER BY created_at DESC LIMIT 3`
     ).bind(card).all();
@@ -45,7 +48,7 @@ export async function onRequestGet(context) {
     // Random 5 (excluding latest 3)
     const placeholders = latestIds.map(() => '?').join(',');
     const random = await env.DB.prepare(
-      `SELECT free_text, character_id, nickname, nickname_public, created_at
+      `SELECT free_text, character_id, ${nicknameExpr}, nickname_public, created_at
        FROM answers WHERE card_id = ? AND is_hidden = 0 AND id NOT IN (${placeholders})
        ORDER BY RANDOM() LIMIT 5`
     ).bind(card, ...latestIds).all();
