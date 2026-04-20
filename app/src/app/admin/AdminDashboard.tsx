@@ -540,6 +540,12 @@ export default function AdminDashboard() {
       )}
 
       {/* 削除確認モーダル */}
+      <footer className="mt-8 pt-4 border-t border-sumi-200 text-[10px] text-sumi-400 font-mono text-center">
+        build {process.env.NEXT_PUBLIC_BUILD_VERSION ?? 'unknown'} · {process.env.NEXT_PUBLIC_BUILD_TIME
+          ? new Date(process.env.NEXT_PUBLIC_BUILD_TIME).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })
+          : 'unknown'}
+      </footer>
+
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="mx-4 w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
