@@ -41,9 +41,11 @@ function ResultContent() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  // 短歌が未生成の場合ポーリングで再取得（最大30秒）
+  // 短歌が未生成かつ生成中ステータスの間だけポーリング（最大30秒）
+  // failed / completed に遷移したら即停止
   useEffect(() => {
-    if (!id || !result || result.poem) return;
+    if (!id || !result) return;
+    if (result.poem || result.poem_status === 'failed') return;
 
     let attempts = 0;
     const maxAttempts = 10;
@@ -51,7 +53,7 @@ function ResultContent() {
       attempts++;
       try {
         const data = await api.getResult(id);
-        if (data.poem) {
+        if (data.poem || data.poem_status === 'failed') {
           setResult(data);
           clearInterval(interval);
         }
@@ -64,7 +66,7 @@ function ResultContent() {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [id, result?.poem]);
+  }, [id, result?.poem, result?.poem_status]);
 
   if (loading) {
     return (

@@ -161,7 +161,7 @@ anyを断ち
 
       // Save to D1
       await env.DB.prepare(
-        `UPDATE answers SET poem = ? WHERE id = ?`
+        `UPDATE answers SET poem = ?, poem_status = 'completed' WHERE id = ?`
       ).bind(poem, id).run();
       return;
 
@@ -174,5 +174,13 @@ anyを断ち
     }
   }
 
+  // 全試行失敗 — DB の poem_status を failed に更新して UI 側で失敗表示を可能にする
   console.error(`Poem generation failed after ${MAX_RETRIES} attempts:`, lastError);
+  try {
+    await env.DB.prepare(
+      `UPDATE answers SET poem_status = 'failed' WHERE id = ?`
+    ).bind(id).run();
+  } catch (dbErr) {
+    console.error('Failed to mark poem_status=failed:', dbErr);
+  }
 }

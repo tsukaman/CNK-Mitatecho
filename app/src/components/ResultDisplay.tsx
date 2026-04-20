@@ -145,7 +145,19 @@ export default function ResultDisplay({ result, character }: ResultDisplayProps)
             </div>
           </div>
         );
-      })() : (
+      })() : result.poem_status === 'failed' ? (
+        <div className="poem-box relative overflow-hidden rounded-lg p-6 animate-fade-in-d3">
+          <p className="text-xs font-bold text-rokusyo-700">千人一首 ── AIがあなたに詠んだ一首</p>
+          <div className="mt-4 flex flex-col items-center gap-2 py-4 text-center">
+            <p className="text-sm text-beni-600" style={{ fontFamily: "var(--font-zen)" }}>
+              一首の生成に失敗しました
+            </p>
+            <p className="text-xs text-sumi-400">
+              しばし後ほど、同じ URL を開き直してください
+            </p>
+          </div>
+        </div>
+      ) : (
         <div className="poem-box relative overflow-hidden rounded-lg p-6 animate-fade-in-d3">
           <p className="text-xs font-bold text-rokusyo-700">千人一首 ── AIがあなたに詠んだ一首</p>
           <div className="mt-4 flex flex-col items-center gap-3 py-4">

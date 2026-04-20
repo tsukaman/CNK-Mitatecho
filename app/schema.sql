@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS answers (
   free_text TEXT NOT NULL,
   character_id INTEGER NOT NULL,
   poem TEXT,
+  -- 短歌生成の状態: 'pending'（生成中）/ 'completed'（成功）/ 'failed'（3回失敗）
+  poem_status TEXT NOT NULL DEFAULT 'pending',
   nickname TEXT,
   nickname_public INTEGER NOT NULL DEFAULT 0,
   is_hidden INTEGER NOT NULL DEFAULT 0,

@@ -52,6 +52,7 @@ export interface ResultData {
   free_text: string;
   character_id: number;
   poem: string | null;
+  poem_status: 'pending' | 'completed' | 'failed';
   created_at: string;
 }
 
