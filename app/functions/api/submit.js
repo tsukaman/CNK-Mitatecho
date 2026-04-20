@@ -3,6 +3,7 @@ import { successResponse, errorResponse } from '../utils/response.js';
 import { sanitizeText } from '../utils/sanitizer.js';
 import { getCharacterId } from '../utils/mapping.js';
 import { generatePoem } from '../utils/poem-generator.js';
+import { getPromptContext } from '../utils/scenarios-server.js';
 
 export async function onRequestOptions() {
   return handleOptions();
@@ -38,7 +39,10 @@ export async function onRequestPost(context) {
     }
 
     const body = await request.json();
-    const { card, q1, q2, free_text, nickname, nickname_public, q1_choice_text, q2_choice_text, q2_choice_type, sct_template } = body;
+    // 注意: q1_choice_text / q2_choice_text / q2_choice_type / sct_template は
+    // プロンプトインジェクション対策のためクライアント入力を使わず、
+    // card/q1/q2 からサーバ側で引き直す（getPromptContext）
+    const { card, q1, q2, free_text, nickname, nickname_public } = body;
 
     // Validation
     if (!Number.isInteger(card) || card < 1 || card > 6) {
@@ -95,12 +99,14 @@ export async function onRequestPost(context) {
 
     // Generate poem asynchronously (non-blocking, update DB after)
     // waitUntil keeps the worker alive until the async task completes
+    // プロンプト文脈はサーバ側で card/q1/q2 から引き直す（クライアントを信用しない）
+    const promptCtx = getPromptContext(card, q1, q2);
     const poemPromise = generatePoem({
       env, id, character_id, free_text: sanitized_text,
-      q1_choice_text: typeof q1_choice_text === 'string' ? q1_choice_text.slice(0, 100) : '',
-      q2_choice_text: typeof q2_choice_text === 'string' ? q2_choice_text.slice(0, 100) : '',
-      q2_choice_type: typeof q2_choice_type === 'string' ? q2_choice_type.slice(0, 50) : '',
-      sct_template: typeof sct_template === 'string' ? sct_template.slice(0, 200) : '',
+      q1_choice_text: promptCtx.q1_choice_text,
+      q2_choice_text: promptCtx.q2_choice_text,
+      q2_choice_type: promptCtx.q2_choice_type,
+      sct_template: promptCtx.sct_template,
     }).catch((err) => {
       console.error('Poem generation failed:', err);
     });
