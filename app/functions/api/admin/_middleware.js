@@ -1,6 +1,12 @@
 import { handleOptions } from '../../utils/cors.js';
 import { errorResponse } from '../../utils/response.js';
-import { verifyCFAccessJWT, extractCFAccessJWT } from '../../utils/cf-access.js';
+import { verifyCFAccessJWT } from '../../utils/cf-access.js';
+
+function extractCookieJWT(request) {
+  const cookie = request.headers.get('Cookie') || '';
+  const match = cookie.match(/CF_Authorization=([^;]+)/);
+  return match ? match[1] : null;
+}
 
 /**
  * Admin API middleware: centralized authentication for all /api/admin/* endpoints.
@@ -18,31 +24,27 @@ export async function onRequest(context) {
   }
 
   // Method 1: Cf-Access-Jwt-Assertion header
-  // When CF Access protects this path, authenticated requests arrive with this header.
-  // CF Access already validated the token at the edge, so presence is sufficient.
-  // We still verify the JWT for defense-in-depth when env vars are configured.
+  // ヘッダの存在だけでは信頼しない。クライアントから偽造可能なため、
+  // 必ず CF_ACCESS_TEAM / CF_ACCESS_AUD で署名検証を行う。
+  // 検証失敗・env 未設定時は後続の認証方式（cookie / bearer）にフォールスルー。
   const cfAccessHeader = request.headers.get('Cf-Access-Jwt-Assertion');
-  if (cfAccessHeader) {
-    context.data = context.data || {};
-    if (env.CF_ACCESS_TEAM && env.CF_ACCESS_AUD) {
-      const payload = await verifyCFAccessJWT(cfAccessHeader, env.CF_ACCESS_TEAM, env.CF_ACCESS_AUD);
-      if (payload) {
-        context.data.authMethod = 'cf-access';
-        context.data.authEmail = payload.email || 'unknown';
-        return context.next();
-      }
+  if (cfAccessHeader && env.CF_ACCESS_TEAM && env.CF_ACCESS_AUD) {
+    const payload = await verifyCFAccessJWT(cfAccessHeader, env.CF_ACCESS_TEAM, env.CF_ACCESS_AUD);
+    if (payload) {
+      context.data = context.data || {};
+      context.data.authMethod = 'cf-access';
+      context.data.authEmail = payload.email || 'unknown';
+      return context.next();
     }
-    // CF Access header present but verification not configured or failed —
-    // still trust it since CF Access validated at the edge
-    context.data.authMethod = 'cf-access-header';
-    return context.next();
   }
 
-  // Method 2: CF_Authorization cookie (browser without CF Access proxy)
+  // Method 2: CF_Authorization cookie
+  // Method 1 のヘッダ検証とは独立させる。無効ヘッダ付きで正規 cookie を持つ
+  // ケースでも cookie 側で認可できるよう、ここでは cookie のみを参照する。
   if (env.CF_ACCESS_TEAM && env.CF_ACCESS_AUD) {
-    const jwt = extractCFAccessJWT(request);
-    if (jwt) {
-      const payload = await verifyCFAccessJWT(jwt, env.CF_ACCESS_TEAM, env.CF_ACCESS_AUD);
+    const cookieJwt = extractCookieJWT(request);
+    if (cookieJwt) {
+      const payload = await verifyCFAccessJWT(cookieJwt, env.CF_ACCESS_TEAM, env.CF_ACCESS_AUD);
       if (payload) {
         context.data = context.data || {};
         context.data.authMethod = 'cf-access-cookie';
