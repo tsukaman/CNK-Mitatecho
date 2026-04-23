@@ -37,7 +37,21 @@ export default function ShareButton({ character, resultId, poem }: ShareButtonPr
 
   const handleTweet = () => {
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
-    window.open(twitterUrl, "_blank");
+    // ポップアップとして開く。X は decorative な dimensions の window を
+    // intent popup と認識し、投稿完了後に自動クローズしてくれる。
+    // "_blank" (= 通常タブ) だと投稿後にXのホームへ遷移してしまい、再度投稿画面が
+    // 表示されているように見える UX 不良が起きる。
+    const width = 550;
+    const height = 600;
+    const left = Math.max(0, window.screenX + (window.outerWidth - width) / 2);
+    const top = Math.max(0, window.screenY + (window.outerHeight - height) / 2);
+    const opened = window.open(
+      twitterUrl,
+      "cnk-mitatecho-share",
+      `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`,
+    );
+    // ポップアップブロッカー等で開けなかった場合の保険
+    if (!opened) window.open(twitterUrl, "_blank");
   };
 
   const handleCopyUrl = async () => {
