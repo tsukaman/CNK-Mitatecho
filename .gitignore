@@ -12,3 +12,5 @@ references/
 *.tsbuildinfo
 # スクリーンショット参考画像
 /*.png
+# OGP生成に使うGoogle Fonts TTF (app/scripts/generate-ogp.mjs で自動取得)
+app/scripts/fonts/

@@ -13,8 +13,10 @@ interface ShareButtonProps {
 export default function ShareButton({ character, resultId, poem }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
 
+  // シェアURLは /share/[id] を指す。クローラはこのURLを取得して OGP メタタグを読み、
+  // 人間は同エンドポイントから即座に /result?id=xxx にリダイレクトされる。
   const url = typeof window !== "undefined"
-    ? `${window.location.origin}/result?id=${resultId}`
+    ? `${window.location.origin}/share/${resultId}`
     : "";
 
   const { kamiNoKu, shimoNoKu } = poem
