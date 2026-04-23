@@ -25,9 +25,10 @@ export default function ShareButton({ character, resultId, poem }: ShareButtonPr
 
   const text = [
     `⚔ 我は【${character.name}】`,
-    `——${character.title}なり`,
+    `──${character.title}なり`,
     "",
-    `千人一首【AIがあなたに詠んだ一首】`,
+    "🎴 AIが詠みし、われへの一首 ──",
+    "",
     kamiNoKu,
     shimoNoKu,
     "",
