@@ -23,7 +23,7 @@ export default function ShareButton({ character, resultId, poem }: ShareButtonPr
     ? splitPoem(poem)
     : { kamiNoKu: "", shimoNoKu: "" };
 
-  const textBody = [
+  const text = [
     `⚔ 我は【${character.name}】`,
     `──${character.title}なり`,
     "",
@@ -33,28 +33,16 @@ export default function ShareButton({ character, resultId, poem }: ShareButtonPr
     shimoNoKu,
     "",
     "#風雲戦国見立帖 #千人一首 #CloudNativeKaigi",
+    "",
+    url,
   ].join("\n");
 
-  const handleTweet = async () => {
-    // まず Web Share API を試す。モバイル OS / 対応デスクトップブラウザでは
-    // ネイティブのシェアシートが出るため、X 新UIの二重 composer バグを回避できる。
-    // 未対応ブラウザ (Firefox 等) では intent URL へフォールバック。
-    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
-      try {
-        await navigator.share({
-          title: `我は【${character.name}】なり`,
-          text: textBody,
-          url,
-        });
-        return;
-      } catch (err) {
-        // ユーザがダイアログを閉じた (AbortError) 場合は intent フォールバックさせない
-        if (err instanceof Error && err.name === "AbortError") return;
-        // それ以外は intent にフォールバック
-      }
-    }
-
-    const text = `${textBody}\n\n${url}`;
+  const handleTweet = () => {
+    // intent URL を直接開く。iOS/Android Safari は twitter.com/intent/tweet を
+    // X アプリの deeplink として自動解釈するので、アプリがインストール済みなら
+    // 即座に X アプリが起動しプリフィルされる。
+    // 付記: デスクトップの X 新UIでは home feed 背景と modal 双方に内容が
+    // プリフィルされる X 側の挙動があるが、これは X の仕様のため対応不可。
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
     window.open(twitterUrl, "_blank", "noopener,noreferrer");
   };
