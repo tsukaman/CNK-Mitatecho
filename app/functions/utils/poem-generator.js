@@ -17,13 +17,18 @@ export function sanitizeForPrompt(s) {
   if (typeof s !== 'string') return '';
   return s
     // 区切りタグ偽装: <user_input> / <system> / <assistant> / <user> を全角に
-    .replace(/<\/?(user_input|system|assistant|user|instruction|prompt)>/gi, (m) =>
+    // 空白入りの変種 (< user_input >, </ system > 等) も対象にする
+    .replace(/<\s*\/?\s*(user_input|system|assistant|user|instruction|prompt)\s*>/gi, (m) =>
       m.replace(/</g, '＜').replace(/>/g, '＞'),
     )
-    // role: / system: / assistant: のような行頭ロール宣言を無害化
-    .replace(/^[ \t]*(system|assistant|user|role)[:：]/gim, '$1_')
+    // 行頭ロール宣言 (system: / assistant: 等) を無害化。
+    // コロン前の空白、全角コロン、全角スペース (　) も対象。
+    .replace(/^[ \t　]*(system|assistant|user|role)[ \t　]*[:：]/gim, '$1_')
     // マークダウンのコードフェンス (三連バッククォート) を全角に
-    .replace(/```/g, '｀｀｀');
+    .replace(/```/g, '｀｀｀')
+    // ChatML / Llama 系の特殊トークンも無害化
+    .replace(/<\|[^|]*\|>/g, (m) => m.replace(/</g, '＜').replace(/>/g, '＞'))
+    .replace(/\[\/?(INST|SYSTEM|USER|ASSISTANT)\]/gi, (m) => m.replace(/\[/g, '［').replace(/\]/g, '］'));
 }
 
 /**
@@ -201,6 +206,14 @@ anyを断ち
     } catch (err) {
       lastError = err;
       console.error(`Poem generation attempt ${attempt}/${MAX_RETRIES} error:`, err);
+      // リトライ対象: タイムアウト (AbortError) と ネットワーク系 (TypeError) のみ。
+      // それ以外 (実装バグ等の恒久エラー) は即 break して poem_status=failed に。
+      const isAbort = err instanceof Error && err.name === 'AbortError';
+      const isNetwork = err instanceof TypeError;
+      if (!isAbort && !isNetwork) {
+        console.error('Non-retryable exception, aborting retries');
+        break;
+      }
       if (attempt < MAX_RETRIES) {
         await sleep(RETRY_DELAY_MS * attempt);
       }

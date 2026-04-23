@@ -113,6 +113,22 @@ describe("callOpenAIWithProxy", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it("AbortError/TypeError 以外の例外は OpenRouter に流さず再 throw する (情報境界維持)", async () => {
+    // 実装バグなど想定外の Error はフォールバックさせない。
+    const bugError = new Error("unexpected bug");
+    fetchMock.mockRejectedValueOnce(bugError);
+    await expect(
+      callOpenAIWithProxy({
+        apiKey: "sk-test",
+        body,
+        env: { OPENROUTER_API_KEY: ROUTER_KEY },
+      }),
+    ).rejects.toThrow(/unexpected bug/);
+    // OpenAI のみ 1 回呼ばれ、OpenRouter には流れない
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0][0]).toContain("api.openai.com");
+  });
+
   it("OPENROUTER_API_KEY が不正な prefix の場合は throw する", async () => {
     fetchMock.mockResolvedValueOnce(makeResponse(403));
     await expect(

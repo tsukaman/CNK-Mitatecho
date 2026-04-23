@@ -31,7 +31,8 @@ async function fetchWithTimeout(url, init, timeoutMs) {
 
 /**
  * @param {Object} params
- * @param {string} params.apiKey - OpenAI API key
+ * @param {string | null | undefined} params.apiKey - OpenAI API key. null/undefined
+ *   の場合は OpenRouter のみを使う (呼び出し側は env.OPENAI_API_KEY || null を渡す)
  * @param {Object} params.body - Request body
  * @param {Object} params.env - Environment variables
  * @returns {Promise<Response>}
@@ -73,7 +74,14 @@ export async function callOpenAIWithProxy({ apiKey, body, env }) {
       }
     } catch (err) {
       // AbortError (タイムアウト) / TypeError (DNS・TLS 等のネットワーク系)
-      // のみ OpenRouter に回す
+      // のみ OpenRouter に回す。それ以外の例外 (実装バグ等) は再 throw して
+      // 自由回答を別ベンダに流さない。
+      const isAbort = err instanceof Error && err.name === 'AbortError';
+      const isNetwork = err instanceof TypeError;
+      if (!isAbort && !isNetwork) {
+        console.error('OpenAI direct unexpected error, not falling back:', err);
+        throw err;
+      }
       console.warn('OpenAI network/timeout error, trying OpenRouter fallback:', err.message);
     }
   }

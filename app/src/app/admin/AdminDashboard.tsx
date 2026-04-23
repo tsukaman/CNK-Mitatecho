@@ -371,7 +371,11 @@ export default function AdminDashboard() {
                   <td className="px-3 py-2 text-xs text-sumi-500 whitespace-nowrap">{formatDate(entry.created_at)}</td>
                   <td className="px-3 py-2 text-xs max-w-[200px]">{truncate(entry.free_text, 30)}</td>
                   <td className="px-3 py-2 text-xs max-w-[200px]" style={{ fontFamily: "var(--font-poem)" }}>
-                    {entry.poem ? truncate(entry.poem, 25) : <span className="text-sumi-300">生成中...</span>}
+                    {entry.poem
+                      ? truncate(entry.poem, 25)
+                      : entry.poem_status === "failed"
+                        ? <span className="text-red-500">生成失敗</span>
+                        : <span className="text-sumi-300">生成中...</span>}
                   </td>
                   <td className="px-3 py-2 text-center whitespace-nowrap">
                     <button
