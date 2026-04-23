@@ -23,11 +23,7 @@ export default function ShareButton({ character, resultId, poem }: ShareButtonPr
     ? splitPoem(poem)
     : { kamiNoKu: "", shimoNoKu: "" };
 
-  // X intent の `text` と `url` を別パラメータで渡すと、X の新UIが
-  // モーダル composer と background の inline composer の両方に内容を
-  // 書き込んでしまう不具合がある。URL を text 内に含め、url パラメータを
-  // 使わないことで回避する。OGP カード展開には text 内の URL で十分。
-  const text = [
+  const textBody = [
     `⚔ 我は【${character.name}】`,
     `──${character.title}なり`,
     "",
@@ -37,13 +33,30 @@ export default function ShareButton({ character, resultId, poem }: ShareButtonPr
     shimoNoKu,
     "",
     "#風雲戦国見立帖 #千人一首 #CloudNativeKaigi",
-    "",
-    url,
   ].join("\n");
 
-  const handleTweet = () => {
+  const handleTweet = async () => {
+    // まず Web Share API を試す。モバイル OS / 対応デスクトップブラウザでは
+    // ネイティブのシェアシートが出るため、X 新UIの二重 composer バグを回避できる。
+    // 未対応ブラウザ (Firefox 等) では intent URL へフォールバック。
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      try {
+        await navigator.share({
+          title: `我は【${character.name}】なり`,
+          text: textBody,
+          url,
+        });
+        return;
+      } catch (err) {
+        // ユーザがダイアログを閉じた (AbortError) 場合は intent フォールバックさせない
+        if (err instanceof Error && err.name === "AbortError") return;
+        // それ以外は intent にフォールバック
+      }
+    }
+
+    const text = `${textBody}\n\n${url}`;
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
-    window.open(twitterUrl, "_blank");
+    window.open(twitterUrl, "_blank", "noopener,noreferrer");
   };
 
   const handleCopyUrl = async () => {
