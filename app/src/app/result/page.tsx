@@ -85,6 +85,7 @@ function ResultContent() {
   }
 
   const scenario = SCENARIOS[result.card_id];
+  const accent = scenario?.colorCode ?? "#c43c3c";
 
   return (
     <>
@@ -117,21 +118,36 @@ function ResultContent() {
           これまでの問答から導かれし<br />
           汝の見立て ──
         </p>
-        {/* カラーアクセントライン */}
-        <div className="mx-auto mt-4 mb-3 w-16 h-px" style={{ backgroundColor: scenario?.colorCode }} />
+        <div
+          className="relative mx-auto mt-5 aspect-[2/3] w-40 overflow-hidden rounded-md border-2 sm:w-44"
+          style={{
+            borderColor: accent,
+            boxShadow: `0 0 32px ${accent}60`,
+          }}
+        >
+          <Image
+            src={character.portrait}
+            alt={character.name}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 160px, 176px"
+            priority
+          />
+        </div>
+        <div className="mx-auto mt-5 mb-3 w-16 h-px" style={{ backgroundColor: accent }} />
         <h2
           className="text-center text-4xl font-black tracking-[0.15em] text-washi-100"
-          style={{ fontFamily: "var(--font-brush)", textShadow: `0 0 24px ${scenario?.colorCode || "#c43c3c"}80` }}
+          style={{ fontFamily: "var(--font-brush)", textShadow: `0 0 24px ${accent}80` }}
         >
           {character.name}
         </h2>
         <p
           className="mt-2 text-center text-lg font-bold tracking-wider"
-          style={{ fontFamily: "var(--font-zen)", color: scenario?.colorCode || "#c43c3c" }}
+          style={{ fontFamily: "var(--font-zen)", color: accent }}
         >
           「{character.title}」
         </p>
-        <div className="mx-auto mt-4 w-16 h-px" style={{ backgroundColor: scenario?.colorCode }} />
+        <div className="mx-auto mt-4 w-16 h-px" style={{ backgroundColor: accent }} />
       </div>
 
       {/* コンテンツ */}

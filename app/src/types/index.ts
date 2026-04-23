@@ -5,6 +5,7 @@ export interface Character {
   category: string;
   description: string;
   history: string;
+  portrait: string;
 }
 
 export interface Q2Question {
