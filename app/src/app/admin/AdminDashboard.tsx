@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { CHARACTERS } from "@/lib/characters";
+import type { AdminEntry as Entry } from "@/types";
 
 const API_BASE =
   process.env.NODE_ENV === "development"
@@ -20,17 +21,7 @@ const CARD_LABELS = [
 
 type VisibilityFilter = "all" | "visible" | "hidden";
 
-interface Entry {
-  id: string;
-  card_id: number;
-  free_text: string;
-  character_id: number;
-  nickname: string | null;
-  nickname_public: number;
-  poem: string | null;
-  is_hidden: number;
-  created_at: string;
-}
+const PAGE_SIZE = 50;
 
 function getCharacterName(id: number): string {
   const char = CHARACTERS.find((c) => c.id === id);
@@ -61,7 +52,9 @@ export default function AdminDashboard() {
 
   const [entries, setEntries] = useState<Entry[]>([]);
   const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [activeCard, setActiveCard] = useState(0);
   const [visibilityFilter, setVisibilityFilter] = useState<VisibilityFilter>("all");
   const [selectedEntry, setSelectedEntry] = useState<Entry | null>(null);
@@ -78,14 +71,15 @@ export default function AdminDashboard() {
   }, [authToken, useCFAccess]);
 
   const fetchEntries = useCallback(
-    async (card: number, visibility: VisibilityFilter = "all") => {
-      setLoading(true);
+    async (card: number, visibility: VisibilityFilter = "all", append = false) => {
+      if (append) setLoadingMore(true); else setLoading(true);
       try {
         const params = new URLSearchParams();
         if (card > 0) params.set("card", String(card));
         if (visibility !== "all") params.set("visibility", visibility);
-        const qs = params.toString();
-        const url = `${API_BASE}/admin/list${qs ? `?${qs}` : ""}`;
+        params.set("limit", String(PAGE_SIZE));
+        params.set("offset", String(append ? entries.length : 0));
+        const url = `${API_BASE}/admin/list?${params.toString()}`;
         const res = await fetch(url, {
           headers: fetchHeaders(),
           credentials: "include",
@@ -99,16 +93,18 @@ export default function AdminDashboard() {
         }
         const json = await res.json();
         if (json.success) {
-          setEntries(json.data.entries);
+          setEntries((prev) => (append ? [...prev, ...json.data.entries] : json.data.entries));
           setTotal(json.data.total);
+          setHasMore(Boolean(json.data.hasMore));
         }
       } catch (err) {
         console.error("Fetch error:", err);
       } finally {
         setLoading(false);
+        setLoadingMore(false);
       }
     },
-    [fetchHeaders]
+    [fetchHeaders, entries.length]
   );
 
   // 初回: CF Access認証を試行
@@ -120,7 +116,7 @@ export default function AdminDashboard() {
           setUseCFAccess(true);
           setAuthenticated(true);
           const json = await res.json();
-          if (json.success) { setEntries(json.data.entries); setTotal(json.data.total); }
+          if (json.success) { setEntries(json.data.entries); setTotal(json.data.total); setHasMore(Boolean(json.data.hasMore)); }
           return;
         }
       } catch { /* CF Access not available */ }
@@ -133,7 +129,7 @@ export default function AdminDashboard() {
             setAuthToken(saved);
             setAuthenticated(true);
             const json = await res.json();
-            if (json.success) { setEntries(json.data.entries); setTotal(json.data.total); }
+            if (json.success) { setEntries(json.data.entries); setTotal(json.data.total); setHasMore(Boolean(json.data.hasMore)); }
             return;
           }
         } catch { /* invalid token */ }
@@ -165,6 +161,7 @@ export default function AdminDashboard() {
     setAuthenticated(false);
     setEntries([]);
     setTotal(0);
+    setHasMore(false);
     setSelectedEntry(null);
     sessionStorage.removeItem("admin_token");
     if (useCFAccess) {
@@ -337,7 +334,13 @@ export default function AdminDashboard() {
       </div>
 
       {/* 件数 */}
-      <p className="text-xs text-sumi-500 mb-3">{loading ? "読み込み中..." : `${total} 件`}</p>
+      <p className="text-xs text-sumi-500 mb-3">
+        {loading
+          ? "読み込み中..."
+          : total === entries.length
+            ? `${total} 件`
+            : `${entries.length} / ${total} 件`}
+      </p>
 
       {/* テーブル */}
       <div className="overflow-x-auto rounded-lg border border-sumi-200 bg-white">
@@ -407,6 +410,19 @@ export default function AdminDashboard() {
           </tbody>
         </table>
       </div>
+
+      {/* ページ送り */}
+      {hasMore && (
+        <div className="mt-4 text-center">
+          <button
+            onClick={() => fetchEntries(activeCard, visibilityFilter, true)}
+            disabled={loadingMore}
+            className="px-5 py-2 text-xs font-bold rounded border border-sumi-300 bg-white text-sumi-700 hover:bg-sumi-50 disabled:opacity-50"
+          >
+            {loadingMore ? "読み込み中..." : "もっと見る"}
+          </button>
+        </div>
+      )}
 
       {/* 詳細モーダル */}
       {selectedEntry && (

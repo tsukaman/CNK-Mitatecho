@@ -57,6 +57,10 @@ export async function onRequestPatch(context) {
       const poem = body.poem ? sanitizeText(String(body.poem)).slice(0, 200) : null;
       updates.push('poem = ?');
       binds.push(poem);
+      // poem を手動編集したら status も同期する: 値あり → completed / 空 → failed
+      // (pending のまま残すと結果ページがスピナーを出し続ける)
+      updates.push('poem_status = ?');
+      binds.push(poem ? 'completed' : 'failed');
     }
 
     if (updates.length === 0) {
@@ -70,7 +74,7 @@ export async function onRequestPatch(context) {
 
     // 更新後のレコードを返す
     const updated = await env.DB.prepare(
-      `SELECT id, card_id, free_text, character_id, nickname, nickname_public, poem, is_hidden, created_at
+      `SELECT id, card_id, free_text, character_id, nickname, nickname_public, poem, poem_status, is_hidden, created_at
        FROM answers WHERE id = ?`
     ).bind(id).first();
 

@@ -10,9 +10,23 @@ const OPENROUTER_MODEL_MAPPING = {
   'gpt-5-mini': 'openai/gpt-5-mini',
 };
 
+// LLM 1 呼び出しあたりのタイムアウト。Cloudflare Workers の waitUntil は
+// デフォルト 30s でタイムアウトするため、余裕を持って下回る値にする。
+const LLM_TIMEOUT_MS = 20000;
+
 function convertToOpenRouterModel(modelName) {
   if (modelName.includes('/')) return modelName;
   return OPENROUTER_MODEL_MAPPING[modelName] || `openai/${modelName}`;
+}
+
+async function fetchWithTimeout(url, init, timeoutMs) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 /**
@@ -29,18 +43,22 @@ export async function callOpenAIWithProxy({ apiKey, body, env }) {
 
   // Method 1: Direct OpenAI API (preferred)
   // OpenRouter へのフォールバックは 403 (香港等からのリージョンブロック) と
-  // ネットワークエラーに限定する。400/401/500 等で自由回答文を別ベンダに
-  // 流さないための情報境界の制限。
+  // ネットワーク系エラー (AbortError/TypeError) に限定する。400/401/429/500 等で
+  // 自由回答文を別ベンダに流さないための情報境界制限。
   if (apiKey) {
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
+      const response = await fetchWithTimeout(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
         },
-        body: JSON.stringify(body),
-      });
+        LLM_TIMEOUT_MS,
+      );
 
       if (response.ok) {
         return response;
@@ -50,13 +68,13 @@ export async function callOpenAIWithProxy({ apiKey, body, env }) {
         console.warn('OpenAI 403 (region block), trying OpenRouter fallback');
         // fall through to OpenRouter
       } else {
-        // その他の HTTP エラーはそのまま返す（OpenRouter に転送しない）
         console.warn(`OpenAI direct failed with ${response.status}, returning as-is`);
         return response;
       }
     } catch (err) {
-      console.warn('OpenAI network error, trying OpenRouter fallback:', err.message);
-      // fall through to OpenRouter
+      // AbortError (タイムアウト) / TypeError (DNS・TLS 等のネットワーク系)
+      // のみ OpenRouter に回す
+      console.warn('OpenAI network/timeout error, trying OpenRouter fallback:', err.message);
     }
   }
 
@@ -67,16 +85,20 @@ export async function callOpenAIWithProxy({ apiKey, body, env }) {
       model: convertToOpenRouterModel(body.model),
     };
 
-    return fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${env.OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://cnk-mitatecho.pages.dev',
-        'X-Title': '風雲戦国見立帖 〜千人一首〜',
+    return fetchWithTimeout(
+      'https://openrouter.ai/api/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${env.OPENROUTER_API_KEY}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://cnk-mitatecho.pages.dev',
+          'X-Title': '風雲戦国見立帖 〜千人一首〜',
+        },
+        body: JSON.stringify(openRouterBody),
       },
-      body: JSON.stringify(openRouterBody),
-    });
+      LLM_TIMEOUT_MS,
+    );
   }
 
   throw new Error('No API key configured (OPENAI_API_KEY or OPENROUTER_API_KEY required)');

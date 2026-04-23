@@ -13,29 +13,37 @@ export async function onRequestPost(context) {
   const { request, env } = context;
 
   try {
-    // Rate limit: 10 req / 60s / IP （D1 の rate_limits テーブルを UPSERT でカウント）
-    // IP 取得不可時は制限せず通過（NAT/特殊経路での誤集約を回避、fail-open）
-    // D1 例外時も通過（可用性優先）
+    // Rate limit: D1 の rate_limits テーブルを UPSERT でカウントして窓内回数を返す。
+    // - 通常: IP 単位で 10 req / 60s
+    // - CF-Connecting-IP が取れない場合: 匿名バケット (submit:anonymous) に集約し
+    //   3 req / 60s と厳しめに。IP 付きリクエストには影響しない。
+    // - D1 例外: fail-closed (429) で落とす。rate_limits のみが壊れる分離障害は
+    //   実際にはほぼ起きず、直後の INSERT answers も同じ D1 を叩くため。
+    if (!env.DB) {
+      console.error('Rate limit: env.DB is not bound');
+      return errorResponse('Internal server error', 500);
+    }
+
     const ip = request.headers.get('CF-Connecting-IP');
-    if (ip && env.DB) {
-      try {
-        const now = Math.floor(Date.now() / 1000);
-        const windowSec = 60;
-        const maxCount = 10;
-        const result = await env.DB.prepare(
-          `INSERT INTO rate_limits (key, count, window_start)
-           VALUES (?1, 1, ?2)
-           ON CONFLICT(key) DO UPDATE SET
-             count = CASE WHEN rate_limits.window_start + ?3 <= ?2 THEN 1 ELSE rate_limits.count + 1 END,
-             window_start = CASE WHEN rate_limits.window_start + ?3 <= ?2 THEN ?2 ELSE rate_limits.window_start END
-           RETURNING count`
-        ).bind(`submit:${ip}`, now, windowSec).first();
-        if (result && result.count > maxCount) {
-          return errorResponse('投稿が集中しています。少し時間を置いて再度お試しください。', 429);
-        }
-      } catch (err) {
-        console.warn('Rate limit D1 error (fail-open):', err.message);
+    const rateKey = ip ? `submit:${ip}` : 'submit:anonymous';
+    const maxCount = ip ? 10 : 3;
+    try {
+      const now = Math.floor(Date.now() / 1000);
+      const windowSec = 60;
+      const result = await env.DB.prepare(
+        `INSERT INTO rate_limits (key, count, window_start)
+         VALUES (?1, 1, ?2)
+         ON CONFLICT(key) DO UPDATE SET
+           count = CASE WHEN rate_limits.window_start + ?3 <= ?2 THEN 1 ELSE rate_limits.count + 1 END,
+           window_start = CASE WHEN rate_limits.window_start + ?3 <= ?2 THEN ?2 ELSE rate_limits.window_start END
+         RETURNING count`
+      ).bind(rateKey, now, windowSec).first();
+      if (result && result.count > maxCount) {
+        return errorResponse('投稿が集中しています。少し時間を置いて再度お試しください。', 429);
       }
+    } catch (err) {
+      console.error('Rate limit D1 error (fail-closed):', err.message);
+      return errorResponse('投稿処理が一時的に不安定です。少し時間を置いて再度お試しください。', 429);
     }
 
     const body = await request.json();

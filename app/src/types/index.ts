@@ -73,3 +73,22 @@ export interface PoemEntry {
   nickname_public: number;
   created_at: string;
 }
+
+export type PoemStatus = 'pending' | 'completed' | 'failed';
+
+/**
+ * 管理画面で扱う投稿エントリ。/api/admin/list と
+ * /api/admin/update で返却される shape に対応。
+ */
+export interface AdminEntry {
+  id: string;
+  card_id: number;
+  free_text: string;
+  character_id: number;
+  nickname: string | null;
+  nickname_public: number;
+  poem: string | null;
+  poem_status?: PoemStatus;
+  is_hidden: number;
+  created_at: string;
+}
