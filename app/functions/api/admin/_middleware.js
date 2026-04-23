@@ -1,6 +1,23 @@
-import { handleOptions } from '../../utils/cors.js';
+import { handleAdminOptions, adminCorsHeaders } from '../../utils/cors.js';
 import { errorResponse } from '../../utils/response.js';
 import { verifyCFAccessJWT } from '../../utils/cf-access.js';
+
+/**
+ * 内側ハンドラが返す Response の CORS ヘッダを admin 用 (特定 Origin + credentials)
+ * に差し替える。公開系の `*` CORS を admin に継承させないための後処理。
+ */
+function applyAdminCors(response, env) {
+  const override = adminCorsHeaders(env);
+  const newHeaders = new Headers(response.headers);
+  for (const [k, v] of Object.entries(override)) {
+    newHeaders.set(k, v);
+  }
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: newHeaders,
+  });
+}
 
 function extractCookieJWT(request) {
   const cookie = request.headers.get('Cookie') || '';
@@ -37,9 +54,9 @@ function checkSameOrigin(request, env) {
 export async function onRequest(context) {
   const { request, env } = context;
 
-  // Handle CORS preflight
+  // Handle CORS preflight (admin-scoped origin)
   if (request.method === 'OPTIONS') {
-    return handleOptions();
+    return handleAdminOptions(env);
   }
 
   // Method 1: Cf-Access-Jwt-Assertion header
@@ -51,12 +68,12 @@ export async function onRequest(context) {
     const payload = await verifyCFAccessJWT(cfAccessHeader, env.CF_ACCESS_TEAM, env.CF_ACCESS_AUD);
     if (payload) {
       if (!checkSameOrigin(request, env)) {
-        return errorResponse('Forbidden: origin check failed', 403);
+        return applyAdminCors(errorResponse('Forbidden: origin check failed', 403), env);
       }
       context.data = context.data || {};
       context.data.authMethod = 'cf-access';
       context.data.authEmail = payload.email || 'unknown';
-      return context.next();
+      return applyAdminCors(await context.next(), env);
     }
   }
 
@@ -69,12 +86,12 @@ export async function onRequest(context) {
       const payload = await verifyCFAccessJWT(cookieJwt, env.CF_ACCESS_TEAM, env.CF_ACCESS_AUD);
       if (payload) {
         if (!checkSameOrigin(request, env)) {
-          return errorResponse('Forbidden: origin check failed', 403);
+          return applyAdminCors(errorResponse('Forbidden: origin check failed', 403), env);
         }
         context.data = context.data || {};
         context.data.authMethod = 'cf-access-cookie';
         context.data.authEmail = payload.email || 'unknown';
-        return context.next();
+        return applyAdminCors(await context.next(), env);
       }
     }
   }
@@ -86,8 +103,8 @@ export async function onRequest(context) {
   if (env.ADMIN_API_KEY && authHeader === `Bearer ${env.ADMIN_API_KEY}`) {
     context.data = context.data || {};
     context.data.authMethod = 'api-key';
-    return context.next();
+    return applyAdminCors(await context.next(), env);
   }
 
-  return errorResponse('Unauthorized', 401);
+  return applyAdminCors(errorResponse('Unauthorized', 401), env);
 }

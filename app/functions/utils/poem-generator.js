@@ -13,7 +13,7 @@ function sleep(ms) {
  * 区切り用のタグと閉じタグ偽装、ロール偽装に使われがちなトークンを
  * 全角化 or 削除する。DB保存値は変えない（プロンプト埋め込み時のみ適用）。
  */
-function sanitizeForPrompt(s) {
+export function sanitizeForPrompt(s) {
   if (typeof s !== 'string') return '';
   return s
     // 区切りタグ偽装: <user_input> / <system> / <assistant> / <user> を全角に

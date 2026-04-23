@@ -107,7 +107,10 @@ export default function AdminDashboard() {
     [fetchHeaders, entries.length]
   );
 
-  // 初回: CF Access認証を試行
+  // 初回: CF Access認証を試行。
+  // 以前は ADMIN_API_KEY を sessionStorage に保持していたが、XSS 発生時の
+  // 被害拡大防止のため撤去。Bearer は本画面ではメモリ保持のみとし、
+  // ページ再読み込みで再入力が必要（通常は CF Access 経由を推奨）。
   useEffect(() => {
     async function tryAuth() {
       try {
@@ -120,21 +123,6 @@ export default function AdminDashboard() {
           return;
         }
       } catch { /* CF Access not available */ }
-
-      const saved = sessionStorage.getItem("admin_token");
-      if (saved) {
-        try {
-          const res = await fetch(`${API_BASE}/admin/list`, { headers: { Authorization: `Bearer ${saved}` } });
-          if (res.ok) {
-            setAuthToken(saved);
-            setAuthenticated(true);
-            const json = await res.json();
-            if (json.success) { setEntries(json.data.entries); setTotal(json.data.total); setHasMore(Boolean(json.data.hasMore)); }
-            return;
-          }
-        } catch { /* invalid token */ }
-        sessionStorage.removeItem("admin_token");
-      }
     }
     tryAuth();
   }, []);
@@ -146,10 +134,9 @@ export default function AdminDashboard() {
       const res = await fetch(`${API_BASE}/admin/list`, { headers: { Authorization: `Bearer ${tokenInput.trim()}` } });
       if (res.ok) {
         setAuthToken(tokenInput.trim());
-        sessionStorage.setItem("admin_token", tokenInput.trim());
         setAuthenticated(true);
         const json = await res.json();
-        if (json.success) { setEntries(json.data.entries); setTotal(json.data.total); }
+        if (json.success) { setEntries(json.data.entries); setTotal(json.data.total); setHasMore(Boolean(json.data.hasMore)); }
       } else {
         setAuthError("認証に失敗しました。APIキーを確認してください。");
       }
@@ -163,7 +150,6 @@ export default function AdminDashboard() {
     setTotal(0);
     setHasMore(false);
     setSelectedEntry(null);
-    sessionStorage.removeItem("admin_token");
     if (useCFAccess) {
       setUseCFAccess(false);
       window.location.href = `https://cnk-mitatecho.cloudflareaccess.com/cdn-cgi/access/logout?returnTo=${encodeURIComponent("https://cnk-mitatecho.pages.dev/admin")}`;
