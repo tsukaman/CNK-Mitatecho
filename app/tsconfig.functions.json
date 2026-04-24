@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "WebWorker"],
+    "types": ["@cloudflare/workers-types"],
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "strict": true,
+    // context 引数や D1 result 行など、Pages Functions 側はランタイムで
+    // ダックタイピングされるケースが多い。strict 全開だと JSDoc だらけに
+    // なるので implicit any は許容し、null 安全と型不整合の検出を優先する。
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true
+  },
+  "include": ["functions/**/*.js"],
+  "exclude": ["node_modules"]
+}

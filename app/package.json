@@ -9,7 +9,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc --noEmit && tsc --project tsconfig.functions.json --noEmit",
+    "type-check:functions": "tsc --project tsconfig.functions.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -20,6 +21,7 @@
     "react-dom": "19.2.0"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260424.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^24",
     "@types/react": "^19",

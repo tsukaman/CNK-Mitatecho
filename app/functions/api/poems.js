@@ -14,7 +14,8 @@ export async function onRequestGet(context) {
 
   try {
     const url = new URL(request.url);
-    const parsed = parseInt(url.searchParams.get('limit'), 10);
+    const limitRaw = url.searchParams.get('limit');
+    const parsed = limitRaw !== null ? parseInt(limitRaw, 10) : NaN;
     // 負値や NaN を弾き、1〜30 の範囲に収める
     const limit = Math.max(1, Math.min(Number.isFinite(parsed) ? parsed : 12, 30));
 

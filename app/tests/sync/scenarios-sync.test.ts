@@ -1,6 +1,15 @@
 import { describe, it, expect } from "vitest";
-import { SCENARIOS as clientScenarios } from "@/lib/scenarios";
-import { SCENARIOS_SERVER } from "../../functions/utils/scenarios-server.js";
+import { SCENARIOS as clientScenariosRaw } from "@/lib/scenarios";
+import { SCENARIOS_SERVER as SCENARIOS_SERVER_RAW } from "../../functions/utils/scenarios-server.js";
+
+type ServerScenario = {
+  q1Choices: string[];
+  q2: Record<number, { choices: { text: string; type: string }[] }>;
+  sctTemplate: string;
+};
+
+const SCENARIOS_SERVER = SCENARIOS_SERVER_RAW as Record<number, ServerScenario>;
+const clientScenarios = clientScenariosRaw as unknown as Record<number, ServerScenario>;
 
 // scenarios-server.js は src/lib/scenarios.ts からプロンプト用に抜粋した
 // 最小データ。ここでは同期（drift 検知）を機械的に保証する。

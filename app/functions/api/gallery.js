@@ -10,7 +10,8 @@ export async function onRequestGet(context) {
 
   try {
     const url = new URL(request.url);
-    const card = parseInt(url.searchParams.get('card'), 10);
+    const cardRaw = url.searchParams.get('card');
+    const card = cardRaw !== null ? parseInt(cardRaw, 10) : NaN;
 
     if (!Number.isInteger(card) || card < 1 || card > 6) {
       return errorResponse('card must be 1-6', 400);

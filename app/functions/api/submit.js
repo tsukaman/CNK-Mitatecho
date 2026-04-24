@@ -42,7 +42,7 @@ export async function onRequestPost(context) {
         return errorResponse('投稿が集中しています。少し時間を置いて再度お試しください。', 429);
       }
     } catch (err) {
-      console.error('Rate limit D1 error (fail-closed):', err.message);
+      console.error('Rate limit D1 error (fail-closed):', err instanceof Error ? err.message : err);
       return errorResponse('投稿処理が一時的に不安定です。少し時間を置いて再度お試しください。', 429);
     }
 
@@ -122,7 +122,11 @@ export async function onRequestPost(context) {
 
     return successResponse({ id, character_id });
   } catch (err) {
-    console.error('Submit error:', err.message, err.stack);
+    if (err instanceof Error) {
+      console.error('Submit error:', err.message, err.stack);
+    } else {
+      console.error('Submit error:', err);
+    }
     return errorResponse('Internal server error', 500);
   }
 }

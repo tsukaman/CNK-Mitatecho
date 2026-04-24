@@ -1,5 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { SCENARIOS_SERVER, getPromptContext } from "../../functions/utils/scenarios-server.js";
+import { SCENARIOS_SERVER as SCENARIOS_SERVER_RAW, getPromptContext } from "../../functions/utils/scenarios-server.js";
+
+// SCENARIOS_SERVER は {1: ..., 2: ...} のリテラルキーで定義されているため
+// 数値インデックスでのアクセスを TS に許可させるよう Record<number, ...> にキャスト。
+const SCENARIOS_SERVER = SCENARIOS_SERVER_RAW as Record<number, {
+  q1Choices: string[];
+  q2: Record<number, { choices: { text: string; type: string }[] }>;
+  sctTemplate: string;
+}>;
 
 describe("SCENARIOS_SERVER data integrity", () => {
   it("should have all 6 cards", () => {
