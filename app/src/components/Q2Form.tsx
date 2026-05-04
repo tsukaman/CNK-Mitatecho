@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { SCENARIOS } from "@/lib/scenarios";
 import { api } from "@/lib/api-client";
+import { markResultOwned } from "@/lib/result-ownership";
 import { usePageTransition } from "@/components/PageTransition";
 
 interface Q2FormProps {
@@ -58,6 +59,7 @@ export default function Q2Form({ card, q1 }: Q2FormProps) {
         q2_choice_type: q2Choice?.type || "",
         sct_template: scenario.sctTemplate,
       });
+      markResultOwned(result.id);
       navigateWithTransition(`/result?id=${result.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "エラーが発生しました");

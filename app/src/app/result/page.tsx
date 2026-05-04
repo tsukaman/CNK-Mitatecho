@@ -3,9 +3,11 @@
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { api } from "@/lib/api-client";
 import { getCharacter } from "@/lib/characters";
 import { SCENARIOS } from "@/lib/scenarios";
+import { isResultOwned } from "@/lib/result-ownership";
 import type { ResultData, Character } from "@/types";
 import TitleLogo from "@/components/TitleLogo";
 import ResultDisplay from "@/components/ResultDisplay";
@@ -20,6 +22,11 @@ function ResultContent() {
   const [character, setCharacter] = useState<Character | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isOwner, setIsOwner] = useState(() => (id ? isResultOwned(id) : false));
+
+  useEffect(() => {
+    if (id) setIsOwner(isResultOwned(id));
+  }, [id]);
 
   // 初回取得
   useEffect(() => {
@@ -167,7 +174,16 @@ function ResultContent() {
           <ResultDisplay result={result} character={character} />
         </div>
         <div className="relative z-10">
-          <ShareButton character={character} resultId={id} poem={result.poem} />
+          {isOwner ? (
+            <ShareButton character={character} resultId={id} poem={result.poem} />
+          ) : (
+            <Link
+              href="/"
+              className="wa-cta block rounded-lg px-4 py-3 text-center text-sm font-bold"
+            >
+              あなたも見立てを受けてみる
+            </Link>
+          )}
         </div>
         <hr className="relative z-10 border-sumi-200" />
         <div className="relative z-10">
