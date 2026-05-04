@@ -33,6 +33,12 @@ const H = 630;
 const GOLD = "#CAA85B";
 const DARK = "#0f0f12";
 const CREAM = "#f5eed8";
+// 右半分中央 (x=500..1160) — 右側テキスト＆ロゴをこの x に揃える
+const RIGHT_CENTER = 830;
+// 上部タイトル画像の貼り位置と、mitate→thousand を一体に見せるための重なり
+const TITLE_TOP = 50;
+const TITLE_STACK_OVERLAP = 8;
+const LOGO_TOP = 555;
 
 const CHARACTERS = [
   { id: 1, name: "織田信長", title: "破壊的リファクタリングの革命児", slug: "01-oda-nobunaga" },
@@ -85,45 +91,36 @@ function textToPath(font, text, { x, y, fontSize, fill, maxWidth, anchor = "left
 }
 
 function buildSvg(character) {
-  const paths = [];
-
-  // アプリタイトル (小 — 上部)
-  paths.push(textToPath(zenRegFont, "風雲戦国見立帖 〜千人一首〜", {
-    x: 500, y: 90, fontSize: 32, fill: GOLD, maxWidth: 660,
-  }));
-
-  // 金のアクセント横線
-  const accentLine1 = `<line x1="500" y1="118" x2="660" y2="118" stroke="${GOLD}" stroke-width="2" />`;
-
-  // 武将名 (特大 — 筆文字)
-  const namePath = textToPath(brushFont, character.name, {
-    x: 500, y: 250, fontSize: 120, fill: CREAM, maxWidth: 660,
-  });
-  paths.push(namePath);
-
-  // 「二つ名」(中 — 明朝太字)
-  const titleText = `「${character.title}」`;
-  const titlePath = textToPath(zenBoldFont, titleText, {
-    x: 500, y: 340, fontSize: 38, fill: GOLD, maxWidth: 660,
-  });
-  paths.push(titlePath);
-
-  // 下部 — 短歌を詠ませるコピー
-  paths.push(textToPath(zenRegFont, "──── AIが詠む、汝だけの一首 ────", {
-    x: 500, y: 470, fontSize: 26, fill: "#d8c48a", maxWidth: 660,
-  }));
-
-  // 下部 — イベント名
-  paths.push(textToPath(zenRegFont, "クラウドネイティブ会議 2026 × 戦国武将 見立て診断", {
-    x: 500, y: 540, fontSize: 24, fill: "#b89c6a", maxWidth: 660,
-  }));
-
+  const paths = [
+    textToPath(brushFont, character.name, {
+      x: RIGHT_CENTER, y: 290, fontSize: 120, fill: CREAM, maxWidth: 660, anchor: "center baseline",
+    }),
+    textToPath(zenBoldFont, `「${character.title}」`, {
+      x: RIGHT_CENTER, y: 380, fontSize: 38, fill: GOLD, maxWidth: 660, anchor: "center baseline",
+    }),
+    textToPath(zenRegFont, "──── AIが詠む、汝だけの一首 ────", {
+      x: RIGHT_CENTER, y: 490, fontSize: 26, fill: "#d8c48a", maxWidth: 660, anchor: "center baseline",
+    }),
+    textToPath(zenRegFont, "戦国武将 × エンジニアタイプ診断", {
+      x: RIGHT_CENTER, y: 540, fontSize: 20, fill: "#d8c48a", maxWidth: 540, anchor: "center baseline",
+    }),
+  ];
   const pathSvgs = paths.map(p => `<path d="${p.d}" fill="${p.fill}" />`).join("");
+  return Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">${pathSvgs}</svg>`);
+}
 
-  return Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">
-  ${accentLine1}
-  ${pathSvgs}
-</svg>`);
+// PNG オーバーレイを読み込んで中央寄せ用の x も計算して返す。
+// tint=true なら negate で黒筆→白筆に変換（暗背景でも視認できるように）。
+async function loadCenteredOverlay(srcPath, width, { tint = false } = {}) {
+  const pipeline = sharp(srcPath).resize({ width });
+  if (tint) pipeline.negate({ alpha: false });
+  const { data, info } = await pipeline.png().toBuffer({ resolveWithObject: true });
+  return {
+    buffer: data,
+    width: info.width,
+    height: info.height,
+    x: Math.round(RIGHT_CENTER - info.width / 2),
+  };
 }
 
 async function buildBackground() {
@@ -171,31 +168,45 @@ async function buildPortrait(slug) {
     .toBuffer();
 }
 
-async function generateOne(character) {
-  const bg = await buildBackground();
+async function generateOne(character, shared) {
   const portrait = await buildPortrait(character.slug);
   const textSvg = buildSvg(character);
+  const { bg, titleMitate, titleThousand, logoWide } = shared;
 
   const outPath = resolve(OUT_DIR, `${character.slug}.png`);
   await sharp(bg)
     .composite([
       { input: portrait, top: 10, left: 40 },
+      { input: titleMitate.buffer, top: TITLE_TOP, left: titleMitate.x },
+      {
+        input: titleThousand.buffer,
+        top: TITLE_TOP + titleMitate.height - TITLE_STACK_OVERLAP,
+        left: titleThousand.x,
+      },
       { input: textSvg, top: 0, left: 0 },
+      { input: logoWide.buffer, top: LOGO_TOP, left: logoWide.x },
     ])
     .png({ quality: 90 })
     .toFile(outPath);
-
-  const { size } = await sharp(outPath).metadata();
-  return { slug: character.slug, size };
 }
 
 async function main() {
   const start = Date.now();
   console.log(`Generating ${CHARACTERS.length} OGP images...`);
+
+  // 32人で共通の素材は1回だけ作る
+  const [bg, titleMitate, titleThousand, logoWide] = await Promise.all([
+    buildBackground(),
+    loadCenteredOverlay(resolve(PUBLIC, "title-mitate.png"), 420, { tint: true }),
+    loadCenteredOverlay(resolve(PUBLIC, "title-thousand.png"), 200),
+    loadCenteredOverlay(resolve(PUBLIC, "logo-wide.png"), 300, { tint: true }),
+  ]);
+  const shared = { bg, titleMitate, titleThousand, logoWide };
+
   for (const c of CHARACTERS) {
-    const { slug } = await generateOne(c);
-    const bytes = statSync(resolve(OUT_DIR, `${slug}.png`)).size;
-    console.log(`  ✓ ${slug}.png  (${Math.round(bytes / 1024)} KB)`);
+    await generateOne(c, shared);
+    const bytes = statSync(resolve(OUT_DIR, `${c.slug}.png`)).size;
+    console.log(`  ✓ ${c.slug}.png  (${Math.round(bytes / 1024)} KB)`);
   }
   const elapsed = ((Date.now() - start) / 1000).toFixed(1);
   console.log(`Done in ${elapsed}s`);
