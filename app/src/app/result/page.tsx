@@ -181,7 +181,7 @@ function ResultContent() {
               href="/"
               className="wa-cta block rounded-lg px-4 py-3 text-center text-sm font-bold"
             >
-              あなたも見立てを受けてみる
+              トップへ戻る
             </Link>
           )}
         </div>
