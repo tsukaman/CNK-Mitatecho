@@ -29,7 +29,7 @@
     "sharp": "^0.34.5",
     "tailwindcss": "^4",
     "text-to-svg": "^3.1.5",
-    "typescript": "^5",
+    "typescript": "^6",
     "vitest": "^4.0.18",
     "wrangler": "^4.43.0"
   }
