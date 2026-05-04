@@ -43,6 +43,10 @@ function truncate(text: string, max: number): string {
   return text.length > max ? text.slice(0, max) + "…" : text;
 }
 
+function getResultUrl(entryId: string): string {
+  return `${window.location.origin}/result?id=${entryId}`;
+}
+
 export default function AdminDashboard() {
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [tokenInput, setTokenInput] = useState("");
@@ -64,6 +68,21 @@ export default function AdminDashboard() {
   const [editTarget, setEditTarget] = useState<Entry | null>(null);
   const [editForm, setEditForm] = useState({ free_text: "", nickname: "", nickname_public: 0, poem: "" });
   const [saving, setSaving] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopyResultUrl = async (entryId: string) => {
+    if (!navigator.clipboard) {
+      alert("このブラウザではクリップボードへのコピーに対応していません。");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(getResultUrl(entryId));
+      setCopiedId(entryId);
+      setTimeout(() => setCopiedId((id) => (id === entryId ? null : id)), 1500);
+    } catch (err) {
+      console.error("Copy failed:", err);
+    }
+  };
 
   const fetchHeaders = useCallback((): HeadersInit => {
     if (useCFAccess) return {};
@@ -379,6 +398,14 @@ export default function AdminDashboard() {
                   </td>
                   <td className="px-3 py-2 text-center whitespace-nowrap">
                     <button
+                      onClick={(e) => { e.stopPropagation(); handleCopyResultUrl(entry.id); }}
+                      className="text-xs mr-2 text-ai-600 hover:text-ai-800 hover:underline"
+                      title="結果ページのURLをコピー"
+                      aria-label={copiedId === entry.id ? "コピーしました" : "結果ページのURLをコピー"}
+                    >
+                      {copiedId === entry.id ? "✓" : "URL"}
+                    </button>
+                    <button
                       onClick={(e) => { e.stopPropagation(); handleToggleVisibility(entry); }}
                       disabled={toggling === entry.id}
                       className={`text-xs mr-2 hover:underline ${hidden ? "text-green-600 hover:text-green-800" : "text-yellow-600 hover:text-yellow-800"}`}
@@ -432,6 +459,32 @@ export default function AdminDashboard() {
             <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
               <dt className="text-sumi-500 font-bold">ID</dt>
               <dd className="font-mono text-xs">{selectedEntry.id}</dd>
+              <dt className="text-sumi-500 font-bold">結果URL</dt>
+              <dd className="flex flex-wrap items-center gap-2">
+                {(() => {
+                  const url = getResultUrl(selectedEntry.id);
+                  return (
+                    <>
+                      <code className="font-mono text-xs text-sumi-600 break-all">{url}</code>
+                      <button
+                        onClick={() => handleCopyResultUrl(selectedEntry.id)}
+                        className="shrink-0 text-xs text-ai-600 border border-ai-300 rounded px-2 py-0.5 hover:bg-ai-50"
+                      >
+                        {copiedId === selectedEntry.id ? "コピー済み" : "コピー"}
+                      </button>
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="結果ページを新しいタブで開く"
+                        className="shrink-0 text-xs text-ai-600 border border-ai-300 rounded px-2 py-0.5 hover:bg-ai-50"
+                      >
+                        開く ↗
+                      </a>
+                    </>
+                  );
+                })()}
+              </dd>
               <dt className="text-sumi-500 font-bold">巻</dt>
               <dd><span style={{ color: CARD_LABELS.find((c) => c.id === selectedEntry.card_id)?.color }}>{CARD_LABELS.find((c) => c.id === selectedEntry.card_id)?.label}</span></dd>
               <dt className="text-sumi-500 font-bold">武将</dt>
