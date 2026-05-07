@@ -32,7 +32,7 @@ export default function ShareButton({ character, resultId, poem }: ShareButtonPr
     kamiNoKu,
     shimoNoKu,
     "",
-    "#風雲戦国見立帖 #千人一首 #CloudNativeKaigi",
+    "#千人一首 #CloudNativeKaigi",
     "",
     url,
   ].join("\n");
