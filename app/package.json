@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "nanoid": "^5.1.6",
-    "next": "^15.5.18",
+    "next": "^16.2.6",
     "react": "19.2.5",
     "react-dom": "19.2.5"
   },
