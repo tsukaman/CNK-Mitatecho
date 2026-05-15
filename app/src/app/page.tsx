@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -103,6 +103,12 @@ function PoemGallery() {
 
 /** ランディングページ（デフォルト表示） */
 function PrairieCardLanding() {
+  const router = useRouter();
+  const handleRandomCard = () => {
+    const randomId = Math.floor(Math.random() * 6) + 1;
+    router.push(`/select/${getCardSlug(randomId)}`);
+  };
+
   return (
     <>
       {/* ヒーロー */}
@@ -171,6 +177,53 @@ function PrairieCardLanding() {
               <p className="text-sm text-sumi-700 leading-relaxed">{text}</p>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* オンライン参加者向け体験導線 */}
+      <div className="mx-auto max-w-lg px-4 pb-10">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="h-px flex-1 bg-sumi-200" />
+          <p className="text-base font-bold text-sumi-600 tracking-widest shrink-0" style={{ fontFamily: "var(--font-zen)" }}>
+            遠つ国より参陣の方へ
+          </p>
+          <div className="h-px flex-1 bg-sumi-200" />
+        </div>
+        <p className="text-center text-xs text-sumi-500 mb-5 leading-relaxed">
+          オンライン参加の方は、こちらから診断を始められます。
+        </p>
+        <div className="flex flex-col gap-3">
+          <button
+            type="button"
+            onClick={handleRandomCard}
+            className="cnk-card group relative flex items-center justify-center gap-3 p-4 cursor-pointer"
+            style={{ borderTopColor: "#b8963e", borderTopWidth: "3px" }}
+          >
+            <span
+              className="text-2xl transition-all duration-300 group-hover:scale-110"
+              style={{ color: "#b8963e", fontFamily: "var(--font-brush)" }}
+            >
+              籤
+            </span>
+            <span className="text-sm font-bold text-sumi-900" style={{ fontFamily: "var(--font-brush)" }}>
+              天運に任せて巻を引く
+            </span>
+          </button>
+          <Link
+            href="/?mode=remote"
+            className="cnk-card group relative flex items-center justify-center gap-3 p-4"
+            style={{ borderTopColor: "#548a8a", borderTopWidth: "3px" }}
+          >
+            <span
+              className="text-2xl transition-all duration-300 group-hover:scale-110"
+              style={{ color: "#548a8a", fontFamily: "var(--font-brush)" }}
+            >
+              選
+            </span>
+            <span className="text-sm font-bold text-sumi-900" style={{ fontFamily: "var(--font-brush)" }}>
+              自ら巻を選ぶ
+            </span>
+          </Link>
         </div>
       </div>
 
