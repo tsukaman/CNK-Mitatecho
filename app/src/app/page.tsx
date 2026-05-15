@@ -184,43 +184,43 @@ function PrairieCardLanding() {
       <div className="mx-auto max-w-lg px-4 pb-10">
         <div className="flex items-center gap-3 mb-5">
           <div className="h-px flex-1 bg-sumi-200" />
-          <p className="text-base font-bold text-sumi-600 tracking-widest shrink-0" style={{ fontFamily: "var(--font-zen)" }}>
+          <p className="text-lg font-bold text-sumi-700 tracking-widest shrink-0" style={{ fontFamily: "var(--font-zen)" }}>
             遠つ国より参陣の方へ
           </p>
           <div className="h-px flex-1 bg-sumi-200" />
         </div>
-        <p className="text-center text-xs text-sumi-500 mb-5 leading-relaxed">
+        <p className="text-center text-sm text-sumi-600 mb-6 leading-relaxed">
           オンライン参加の方は、こちらから診断を始められます。
         </p>
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
           <button
             type="button"
             onClick={handleRandomCard}
-            className="cnk-card group relative flex items-center justify-center gap-3 p-4 cursor-pointer"
-            style={{ borderTopColor: "#b8963e", borderTopWidth: "3px" }}
+            className="cnk-card group relative flex items-center justify-center gap-4 px-6 py-6 cursor-pointer shadow-sm hover:shadow-md transition-shadow"
+            style={{ borderTopColor: "#b8963e", borderTopWidth: "4px" }}
           >
             <span
-              className="text-2xl transition-all duration-300 group-hover:scale-110"
+              className="text-5xl leading-none transition-all duration-300 group-hover:scale-110"
               style={{ color: "#b8963e", fontFamily: "var(--font-brush)" }}
             >
               籤
             </span>
-            <span className="text-sm font-bold text-sumi-900" style={{ fontFamily: "var(--font-brush)" }}>
+            <span className="text-xl font-bold text-sumi-900 tracking-wider" style={{ fontFamily: "var(--font-zen)" }}>
               天運に任せて巻を引く
             </span>
           </button>
           <Link
             href="/?mode=remote"
-            className="cnk-card group relative flex items-center justify-center gap-3 p-4"
-            style={{ borderTopColor: "#548a8a", borderTopWidth: "3px" }}
+            className="cnk-card group relative flex items-center justify-center gap-4 px-6 py-6 shadow-sm hover:shadow-md transition-shadow"
+            style={{ borderTopColor: "#548a8a", borderTopWidth: "4px" }}
           >
             <span
-              className="text-2xl transition-all duration-300 group-hover:scale-110"
+              className="text-5xl leading-none transition-all duration-300 group-hover:scale-110"
               style={{ color: "#548a8a", fontFamily: "var(--font-brush)" }}
             >
               選
             </span>
-            <span className="text-sm font-bold text-sumi-900" style={{ fontFamily: "var(--font-brush)" }}>
+            <span className="text-xl font-bold text-sumi-900 tracking-wider" style={{ fontFamily: "var(--font-zen)" }}>
               自ら巻を選ぶ
             </span>
           </Link>
